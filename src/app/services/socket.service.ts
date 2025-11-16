@@ -28,7 +28,7 @@ interface ArticleViewUpdatedEvent {
 })
 export class SocketService {
   private socket: Socket | null = null;
-  private socketUrl = 'http://localhost:3001'; // WebSocket server URL
+  private socketUrl = environment.socketUrl || 'http://localhost:3001'; // WebSocket server URL
   private newCommentSubject = new Subject<NewCommentEvent>();
   private userTypingSubject = new Subject<UserTyping>();
   private notificationSubject = new Subject<NewNotificationEvent>();
