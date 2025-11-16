@@ -1,4 +1,11 @@
 <div class="home">
+  <!-- Background animated particles -->
+  <div class="background-particles">
+    @for (particle of particles; track particle.id) {
+      <div class="particle" [style.left.%]="particle.left" [style.top.%]="particle.top" [style.animation-delay.s]="particle.delay"></div>
+    }
+  </div>
+
   <header class="hero" *ngIf="!articles().length">
     <div class="hero__content">
       <span class="hero__badge">MEAN Blog</span>
@@ -117,6 +124,37 @@
         </div>
       </ng-template>
     </ng-template>
+
+    <!-- Load More Trigger (for infinite scrolling) -->
+    @if (articles().length > 0 && hasMoreArticles()) {
+      <div #loadMoreTrigger class="load-more-trigger">
+        @if (loadingMore()) {
+          <div class="articles__state">
+            <span class="spinner" aria-hidden="true"></span>
+            <p>Loading more articles...</p>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- End of Articles Message -->
+    @if (articles().length > 0 && !hasMoreArticles() && !loading() && !loadingMore()) {
+      <div class="articles-end">
+        <p>You've reached the end of articles</p>
+      </div>
+    }
   </section>
+
+  <!-- Refresh Articles Button -->
+  @if (showScrollToTop()) {
+    <button 
+      type="button"
+      class="scroll-to-top-btn"
+      (click)="refreshArticles()"
+      aria-label="Refresh articles to check for new ones"
+      title="Refresh articles">
+      <span class="material-symbols-rounded">refresh</span>
+    </button>
+  }
 </div>
 

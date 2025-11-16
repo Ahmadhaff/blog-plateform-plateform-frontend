@@ -1,4 +1,11 @@
 <div class="register-page">
+  <!-- Background animated particles -->
+  <div class="background-particles">
+    @for (particle of particles; track particle.id) {
+      <div class="particle" [style.left.%]="particle.left" [style.top.%]="particle.top" [style.animation-delay.s]="particle.delay"></div>
+    }
+  </div>
+
   <div class="register-container">
     <div class="register-header">
       <h1 class="register-title">Create Account</h1>

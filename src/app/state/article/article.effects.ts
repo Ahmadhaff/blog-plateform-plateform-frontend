@@ -13,11 +13,12 @@ export class ArticleEffects {
   loadArticles$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ArticleActions.loadArticles),
-      switchMap(() =>
-        this.articleService.getArticles().pipe(
+      switchMap(({ page = 1, limit = 10, append = false }) =>
+        this.articleService.getArticles({ page, limit }).pipe(
           map((response) => ArticleActions.loadArticlesSuccess({
             articles: response.articles,
-            pagination: response.pagination
+            pagination: response.pagination,
+            append
           })),
           catchError((error) => of(ArticleActions.loadArticlesFailure({
             error: error?.error?.error || 'Failed to load articles'

@@ -27,6 +27,14 @@ export class MyArticlesComponent implements OnInit {
   readonly editingArticle = signal<Article | null>(null);
   readonly creatingArticle = signal<boolean>(false);
   readonly pagination = signal<any>(null);
+  
+  // Background particles for visual effect
+  readonly particles = Array.from({ length: 12 }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    top: Math.random() * 100,
+    delay: Math.random() * 3
+  }));
 
   editForm: FormGroup;
   createForm: FormGroup;

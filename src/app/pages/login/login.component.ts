@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -13,7 +13,7 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './login.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LoginComponent implements OnDestroy {
+export class LoginComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
@@ -22,6 +22,14 @@ export class LoginComponent implements OnDestroy {
   readonly loading = signal<boolean>(false);
   readonly error = signal<string | null>(null);
   readonly success = signal<string | null>(null);
+  
+  // Background particles for visual effect
+  readonly particles = Array.from({ length: 12 }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    top: Math.random() * 100,
+    delay: Math.random() * 3
+  }));
 
   constructor() {
     // Check for pending login credentials from registration/verification flow
@@ -35,6 +43,14 @@ export class LoginComponent implements OnDestroy {
 
     // Keep credentials in sessionStorage until successful login
     // They will be cleared after successful login
+  }
+
+  ngOnInit(): void {
+    // If user is already authenticated, redirect to home page
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/']);
+      return;
+    }
   }
 
   ngOnDestroy(): void {

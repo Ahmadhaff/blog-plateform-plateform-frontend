@@ -251,6 +251,13 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
             if (event.parentCommentId) {
             // This is a reply - add to replies of parent comment
             this.addReplyToComment(event.parentCommentId, event.comment);
+            // Increment comment count (reply is still a comment)
+            this.article.update(current => {
+              if (current) {
+                return { ...current, commentCount: (current.commentCount || 0) + 1 };
+              }
+              return current;
+            });
           } else {
             // This is a root comment - add to root comments list
             // Check if comment already exists (prevent duplicates)
@@ -260,6 +267,13 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
             
             if (existingIndex === -1) {
               this.comments.update(comments => [...comments, event.comment]);
+              // Increment comment count
+              this.article.update(current => {
+                if (current) {
+                  return { ...current, commentCount: (current.commentCount || 0) + 1 };
+                }
+                return current;
+              });
             }
           }
         }
@@ -651,9 +665,34 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
   }
 
   private removeCommentFromList(commentId: string): void {
+    // First, find and count the comment before removing it
+    const allComments = this.comments();
+    const findCommentAndCount = (comments: Comment[]): { comment: Comment | null, count: number } => {
+      for (const comment of comments) {
+        if (comment._id === commentId || comment._id?.toString() === commentId) {
+          // Count this comment + all its replies
+          let count = 1; // The comment itself
+          if (comment.replies && comment.replies.length > 0) {
+            count += this.countAllComments(comment.replies);
+          }
+          return { comment, count };
+        }
+        if (comment.replies && comment.replies.length > 0) {
+          const found = findCommentAndCount(comment.replies);
+          if (found.comment) {
+            return found;
+          }
+        }
+      }
+      return { comment: null, count: 1 }; // If not found, assume it's a root comment (count = 1)
+    };
+
+    const { count: commentsToRemove } = findCommentAndCount(allComments);
+
+    // Now remove the comment from the list
     const findAndRemove = (comments: Comment[]): Comment[] => {
       return comments
-        .filter(comment => comment._id !== commentId)
+        .filter(comment => comment._id !== commentId && comment._id?.toString() !== commentId)
         .map(comment => {
           if (comment.replies) {
             return {
@@ -665,7 +704,30 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
         });
     };
 
+    // Remove comment from list
     this.comments.update(findAndRemove);
+
+    // Update article comment count
+    this.article.update(current => {
+      if (current) {
+        const newCount = Math.max(0, (current.commentCount || 0) - commentsToRemove);
+        return { ...current, commentCount: newCount };
+      }
+      return current;
+    });
+  }
+
+  /**
+   * Recursively count all comments including replies
+   */
+  private countAllComments(comments: Comment[]): number {
+    let count = comments.length;
+    for (const comment of comments) {
+      if (comment.replies && comment.replies.length > 0) {
+        count += this.countAllComments(comment.replies);
+      }
+    }
+    return count;
   }
 
   /**

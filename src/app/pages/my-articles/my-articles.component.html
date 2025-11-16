@@ -1,4 +1,11 @@
 <div class="my-articles">
+  <!-- Background animated particles -->
+  <div class="background-particles">
+    @for (particle of particles; track particle.id) {
+      <div class="particle" [style.left.%]="particle.left" [style.top.%]="particle.top" [style.animation-delay.s]="particle.delay"></div>
+    }
+  </div>
+
   <div class="my-articles__header">
     <div class="header-content">
       <div>

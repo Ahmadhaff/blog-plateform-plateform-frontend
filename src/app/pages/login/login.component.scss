@@ -1,13 +1,21 @@
 .login-page {
   min-height: 100vh;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  position: relative;
+  // Override app-content background - full viewport coverage for auth pages
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e40af 100%) !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow: hidden;
+  z-index: 1;
 
+  // Animated gradient overlay
   &::before {
     content: '';
     position: absolute;
@@ -16,9 +24,95 @@
     right: 0;
     bottom: 0;
     background: 
-      radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.3) 0%, transparent 50%);
+      radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.25) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(30, 58, 138, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(99, 102, 241, 0.2) 0%, transparent 40%);
     pointer-events: none;
+    animation: gradientShift 8s ease-in-out infinite;
+  }
+
+  // Animated floating shapes
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(circle at 15% 30%, rgba(59, 130, 246, 0.12) 0%, transparent 30%),
+      radial-gradient(circle at 85% 70%, rgba(99, 102, 241, 0.1) 0%, transparent 35%),
+      radial-gradient(circle at 50% 10%, rgba(148, 163, 184, 0.08) 0%, transparent 25%),
+      radial-gradient(circle at 70% 90%, rgba(59, 130, 246, 0.12) 0%, transparent 30%);
+    pointer-events: none;
+    animation: floatShapes 12s ease-in-out infinite;
+  }
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes floatShapes {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.6;
+  }
+  33% {
+    transform: translateY(-20px) translateX(10px);
+    opacity: 0.8;
+  }
+  66% {
+    transform: translateY(10px) translateX(-10px);
+    opacity: 0.7;
+  }
+}
+
+// Animated particles background
+.background-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(148, 163, 184, 0.7);
+  border-radius: 50%;
+  animation: particleFloat 6s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.4;
+  }
+  25% {
+    transform: translateY(-30px) translateX(15px);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-60px) translateX(-10px);
+    opacity: 0.6;
+  }
+  75% {
+    transform: translateY(-30px) translateX(-20px);
+    opacity: 0.8;
   }
 }
 
@@ -181,8 +275,8 @@
 
   &:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
   }
 
   &--error {
@@ -211,13 +305,13 @@
 
 .forgot-password {
   font-size: 0.875rem;
-  color: #667eea;
+  color: #3b82f6;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s;
 
   &:hover {
-    color: #5568d3;
+    color: #2563eb;
     text-decoration: underline;
   }
 }
@@ -225,7 +319,7 @@
 .submit-button {
   width: 100%;
   padding: 0.9375rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -238,11 +332,12 @@
   justify-content: center;
   gap: 0.75rem;
   margin-top: 0.5rem;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 
   &:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   }
 
   &:active:not(:disabled) {
@@ -304,7 +399,7 @@
   width: 48px;
   height: 48px;
   border: 4px solid #e2e8f0;
-  border-top-color: #667eea;
+  border-top-color: #3b82f6;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin: 0 auto;
@@ -324,14 +419,14 @@
 }
 
 .register-link {
-  color: #667eea;
+  color: #3b82f6;
   text-decoration: none;
   font-weight: 600;
   margin-left: 0.25rem;
   transition: color 0.2s;
 
   &:hover {
-    color: #5568d3;
+    color: #2563eb;
     text-decoration: underline;
   }
 }

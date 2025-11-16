@@ -24,9 +24,10 @@ const reducer = createReducer(
     loading: true,
     error: null
   })),
-  on(ArticleActions.loadArticlesSuccess, (state, { articles, pagination }) => ({
+  on(ArticleActions.loadArticlesSuccess, (state, { articles, pagination, append }) => ({
     ...state,
-    articles,
+    // If append is true, append new articles to existing ones, otherwise replace
+    articles: append ? [...state.articles, ...articles] : articles,
     pagination,
     loading: false,
     error: null
@@ -35,7 +36,8 @@ const reducer = createReducer(
     ...state,
     loading: false,
     error,
-    articles: []
+    // Only clear articles if this was not an append operation
+    articles: state.loading ? [] : state.articles
   }))
 );
 

@@ -24,6 +24,14 @@ export class RegisterComponent {
   readonly success = signal<string | null>(null);
   readonly showPassword = signal<boolean>(false);
   readonly showConfirmPassword = signal<boolean>(false);
+  
+  // Background particles for visual effect
+  readonly particles = Array.from({ length: 12 }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    top: Math.random() * 100,
+    delay: Math.random() * 3
+  }));
 
   readonly roles: { value: 'Rédacteur' | 'Lecteur'; label: string }[] = [
     { value: 'Rédacteur', label: 'Writer (Rédacteur)' },

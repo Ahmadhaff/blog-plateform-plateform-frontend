@@ -1,11 +1,59 @@
 .my-articles {
+  min-height: calc(100vh - 140px); // Full viewport minus header/footer
+  width: 100%;
   max-width: 1000px;
-  margin: clamp(1rem, 3vw, 2rem) auto;
-  padding: 0 clamp(1rem, 4vw, 2rem);
+  margin: 0 auto;
+  padding: 2rem clamp(1rem, 4vw, 2rem);
   transition: padding 0.3s ease;
+  // Same background as login/home pages
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e40af 100%) !important;
+  background-attachment: fixed !important;
+  position: relative;
+  overflow: hidden;
+  display: block;
+  color: #fff;
+  // Ensure this sits on top of any other backgrounds
+  isolation: isolate;
+
+  // Animated gradient overlay
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.25) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(30, 58, 138, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(99, 102, 241, 0.2) 0%, transparent 40%);
+    pointer-events: none;
+    animation: gradientShift 8s ease-in-out infinite;
+    z-index: 0;
+  }
+
+  // Animated floating shapes
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(circle at 15% 30%, rgba(59, 130, 246, 0.12) 0%, transparent 30%),
+      radial-gradient(circle at 85% 70%, rgba(99, 102, 241, 0.1) 0%, transparent 35%),
+      radial-gradient(circle at 50% 10%, rgba(148, 163, 184, 0.08) 0%, transparent 25%),
+      radial-gradient(circle at 70% 90%, rgba(59, 130, 246, 0.12) 0%, transparent 30%);
+    pointer-events: none;
+    animation: floatShapes 12s ease-in-out infinite;
+    z-index: 0;
+  }
 
   &__header {
     margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
 
     .header-content {
       display: flex;
@@ -17,7 +65,7 @@
     h1 {
       font-size: clamp(1.5rem, 4vw, 2rem);
       font-weight: 700;
-      color: #0f172a;
+      color: #ffffff;
       margin-bottom: 0.5rem;
       line-height: 1.2;
 
@@ -28,7 +76,7 @@
     }
 
     .subtitle {
-      color: #64748b;
+      color: rgba(226, 232, 240, 0.85);
       font-size: clamp(0.875rem, 2vw, 1rem);
       line-height: 1.5;
 
@@ -43,11 +91,13 @@
   .empty-state {
     text-align: center;
     padding: 3rem 1rem;
-    color: #64748b;
+    color: rgba(226, 232, 240, 0.9);
+    position: relative;
+    z-index: 1;
   }
 
   .error {
-    color: #dc2626;
+    color: #fca5a5;
     margin-bottom: 1rem;
   }
 
@@ -82,18 +132,89 @@
   }
 }
 
+@keyframes gradientShift {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes floatShapes {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.6;
+  }
+  33% {
+    transform: translateY(-20px) translateX(10px);
+    opacity: 0.8;
+  }
+  66% {
+    transform: translateY(10px) translateX(-10px);
+    opacity: 0.7;
+  }
+}
+
+// Animated particles background
+.background-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(148, 163, 184, 0.7);
+  border-radius: 50%;
+  animation: particleFloat 6s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.4;
+  }
+  25% {
+    transform: translateY(-30px) translateX(15px);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-60px) translateX(-10px);
+    opacity: 0.6;
+  }
+  75% {
+    transform: translateY(-30px) translateX(-20px);
+    opacity: 0.8;
+  }
+}
+
 .articles-list {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 .article-item {
   background: #fff;
   border-radius: 12px;
   padding: clamp(1rem, 2vw, 1.5rem);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: padding 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: padding 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  z-index: 1;
 
   @media (max-width: 640px) {
     padding: 1rem;
@@ -329,17 +450,19 @@
 
 .create-form-container {
   margin-bottom: 2rem;
+  position: relative;
+  z-index: 1;
 
   h2 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #0f172a;
+    color: #ffffff;
     margin-bottom: 1.5rem;
   }
 }
 
 .required {
-  color: #ef4444;
+  color: #fca5a5;
 }
 
 @media (max-width: 1024px) {

@@ -2,8 +2,9 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f8fafc;
-  color: #0f172a;
+  // Transparent so body background shows through when pages don't cover
+  background: transparent;
+  color: #fff;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -477,14 +478,14 @@
 
     .login-button {
       padding: 0.625rem 1.5rem;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
       color: #fff;
       text-decoration: none;
       border-radius: 999px;
       font-weight: 600;
       font-size: 0.9375rem;
       transition: all 0.2s ease;
-      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
       white-space: nowrap;
 
       @media (max-width: 640px) {
@@ -494,7 +495,8 @@
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
       }
     }
 
@@ -535,6 +537,38 @@
   flex: 1;
   overflow-x: hidden; // Prevent horizontal scroll
   max-width: 100%;
+  // No background - let each page component set its own
+  // Body background will show through as fallback
+  background: transparent;
+  min-height: calc(100vh - 140px); // Account for header and footer
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  // Ensure router-outlet content is properly contained
+  isolation: isolate;
+}
+
+// Target the component rendered by router-outlet
+// Using :host to properly target Angular component host elements
+:host ::ng-deep router-outlet + * {
+  flex: 1;
+  min-height: 100%;
+  width: 100%;
+  display: block;
+}
+
+// Override for settings component to allow flex centering
+:host ::ng-deep router-outlet + app-settings {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+// Override for settings-menu component to allow flex centering
+:host ::ng-deep router-outlet + app-settings-menu {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 .app-footer {
