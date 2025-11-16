@@ -1,0 +1,144 @@
+<div class="article-detail">
+  <div class="article-detail__back">
+    <a routerLink="/" class="back-link">
+      <span class="material-symbols-rounded">arrow_back</span>
+      Back to Articles
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading article...</div>
+  } @else if (error()) {
+    <div class="error">{{ error() }}</div>
+  } @else if (article()) {
+    <article class="article">
+      <!-- Article Header -->
+      <div class="article__header">
+        <h1 class="article__title">{{ article()!.title }}</h1>
+        
+        <div class="article__meta">
+          <span class="article__author">By {{ article()!.author?.username || 'Unknown' }}</span>
+          <span class="article__date">{{ article()!.createdAt | date:'medium' }}</span>
+          <span class="article__views">{{ article()!.views }} views</span>
+        </div>
+
+        <!-- Like Button -->
+        <div class="article__actions">
+          @if (isAuthenticated()) {
+            <button
+              type="button"
+              (click)="toggleArticleLike()"
+              class="article-like-btn"
+              [class.article-like-btn--liked]="hasLikedArticle()">
+              <span class="material-symbols-rounded">favorite</span>
+              @if (article()!.likesCount > 0) {
+                <span>{{ article()!.likesCount }}</span>
+              }
+            </button>
+          } @else {
+            <button
+              type="button"
+              (click)="navigateToLogin()"
+              class="article-like-btn"
+              title="Log in to like this article">
+              <span class="material-symbols-rounded">favorite</span>
+              @if (article()!.likesCount > 0) {
+                <span>{{ article()!.likesCount }}</span>
+              }
+            </button>
+          }
+        </div>
+      </div>
+      
+      @if (article()!.imageUrl) {
+        <div class="article__image">
+          <img [src]="article()!.imageUrl" [alt]="article()!.title" />
+        </div>
+      }
+
+      <div class="article__content" [innerHTML]="article()!.content"></div>
+
+      @if (article()!.tags && article()!.tags.length > 0) {
+        <div class="article__tags">
+          @for (tag of article()!.tags; track tag) {
+            <span class="tag">{{ tag }}</span>
+          }
+        </div>
+      }
+
+      <!-- Divider -->
+      <div class="article__divider"></div>
+
+      <!-- Comments Section - Integrated within article -->
+      <section class="article__comments">
+        <div class="comments-header">
+          <h3 class="comments-header__title">
+            Comments
+            @if (article()!.commentCount && article()!.commentCount > 0) {
+              <span class="comments-count">({{ article()!.commentCount }})</span>
+            }
+          </h3>
+        </div>
+
+        <!-- Typing Indicator -->
+        @if (typingUsers().length > 0) {
+          <div class="typing-indicator">
+            {{ typingUsers().join(', ') }} {{ typingUsers().length === 1 ? 'is' : 'are' }} typing...
+          </div>
+        }
+
+        <!-- Comment Form (only for authenticated users) -->
+        @if (isAuthenticated()) {
+          <form [formGroup]="commentForm" (ngSubmit)="postComment()" class="comment-form">
+            <textarea
+              formControlName="content"
+              (input)="onCommentInput()"
+              placeholder="Write a comment..."
+              rows="3"
+              class="comment-form__textarea">
+            </textarea>
+            @if (commentForm.get('content')?.invalid && commentForm.get('content')?.touched) {
+              <div class="comment-form__error">Comment is required (max 1000 characters)</div>
+            }
+            <div class="comment-form__actions">
+              <button type="submit" [disabled]="commentForm.invalid" class="comment-form__submit">
+                Post Comment
+              </button>
+            </div>
+          </form>
+        } @else {
+          <div class="comment-form-guest">
+            <p>Please <a routerLink="/login" class="login-link">log in</a> to post a comment.</p>
+          </div>
+        }
+
+        <!-- Comments List -->
+        <div class="comments-list">
+          @if (comments().length === 0) {
+            <p class="no-comments">No comments yet. Be the first to comment!</p>
+          } @else {
+            @for (comment of comments(); track trackByCommentId($index, comment)) {
+              <app-comment
+                [comment]="comment"
+                [depth]="0"
+                [replyingTo]="replyingTo()"
+                [editingComment]="editingComment()"
+                [replyForm]="replyForm"
+                [editForm]="editForm"
+                [currentUserId]="currentUserId()"
+                (reply)="replyToComment($event)"
+                (cancelReply)="cancelReply()"
+                (postReply)="postReply($event)"
+                (edit)="startEdit($event)"
+                (cancelEdit)="cancelEdit()"
+                (saveEdit)="saveEdit($event)"
+                (delete)="deleteComment($event)"
+                (like)="toggleLike($event)" />
+            }
+          }
+        </div>
+      </section>
+    </article>
+  }
+</div>
+

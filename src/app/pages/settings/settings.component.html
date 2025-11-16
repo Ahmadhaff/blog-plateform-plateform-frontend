@@ -1,0 +1,170 @@
+<div class="settings-page">
+  <div class="settings-container">
+    <div class="settings-header">
+      <h1 class="settings-title">Account Settings</h1>
+      <p class="settings-subtitle">Manage your account information and preferences</p>
+    </div>
+
+    <!-- Success Message -->
+    @if (success()) {
+      <div class="message message--success">
+        <span class="material-symbols-rounded">check_circle</span>
+        <span>{{ success() }}</span>
+      </div>
+    }
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="message message--error">
+        <span class="material-symbols-rounded">error</span>
+        <span>{{ error() }}</span>
+      </div>
+    }
+
+    <!-- Loading Overlay -->
+    @if (loading() || uploadingAvatar()) {
+      <div class="loading-overlay">
+        <div class="loader">
+          <div class="spinner-large"></div>
+          <p>{{ uploadingAvatar() ? 'Uploading avatar...' : 'Loading profile...' }}</p>
+        </div>
+      </div>
+    }
+
+    <div class="settings-content">
+      <!-- Avatar Section (Separate from Profile Info) -->
+      <div class="settings-section">
+        <h2 class="section-title">Profile Picture</h2>
+        <div class="avatar-section">
+          <div class="avatar-preview">
+            @if (previewUrl()) {
+              <img 
+                [src]="previewUrl()" 
+                alt="Avatar preview" 
+                class="avatar-preview-image"
+                (error)="previewUrl.set(null)" />
+            } @else {
+              <img src="assets/images/default-avatar.svg" alt="Default avatar" class="avatar-preview-image" />
+            }
+          </div>
+          <div class="avatar-actions">
+            <label for="avatar-upload" class="upload-button">
+              <span class="material-symbols-rounded">photo_camera</span>
+              <span>Choose Image</span>
+            </label>
+            <input
+              id="avatar-upload"
+              type="file"
+              accept="image/*"
+              (change)="onFileSelected($event)"
+              class="file-input" />
+            @if (selectedFile()) {
+              <button
+                type="button"
+                (click)="uploadAvatar()"
+                [disabled]="uploadingAvatar()"
+                class="save-button">
+                @if (uploadingAvatar()) {
+                  <span class="spinner"></span>
+                  <span>Uploading...</span>
+                } @else {
+                  <span>Upload Avatar</span>
+                }
+              </button>
+            }
+          </div>
+          <p class="avatar-hint">JPG, PNG or GIF. Max size 2MB. Old avatar will be automatically replaced.</p>
+        </div>
+      </div>
+
+      <!-- Profile Information Section (Username only) -->
+      <div class="settings-section">
+        <h2 class="section-title">Profile Information</h2>
+        <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="profile-form">
+          <!-- Username Field -->
+          <div class="form-group">
+            <label for="username" class="form-label">Username</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <span class="material-symbols-rounded">person</span>
+              </span>
+              <input
+                id="username"
+                type="text"
+                formControlName="username"
+                placeholder="Enter your username"
+                class="form-input"
+                [class.form-input--error]="usernameControl?.invalid && usernameControl?.touched" />
+            </div>
+            @if (usernameControl?.invalid && usernameControl?.touched) {
+              <span class="error-text">
+                @if (usernameControl?.errors?.['required']) {
+                  Username is required
+                } @else if (usernameControl?.errors?.['minlength']) {
+                  Username must be at least 3 characters
+                } @else if (usernameControl?.errors?.['maxlength']) {
+                  Username must be at most 50 characters
+                }
+              </span>
+            }
+          </div>
+
+          <!-- Email Field (Read-only) -->
+          <div class="form-group">
+            <label for="email" class="form-label">Email Address</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <span class="material-symbols-rounded">email</span>
+              </span>
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                class="form-input form-input--readonly"
+                readonly />
+            </div>
+            <p class="field-hint">Email address cannot be changed</p>
+          </div>
+
+          <!-- Role Field (Read-only) -->
+          <div class="form-group">
+            <label for="role" class="form-label">Role</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <span class="material-symbols-rounded">badge</span>
+              </span>
+              <input
+                id="role"
+                type="text"
+                formControlName="role"
+                class="form-input form-input--readonly"
+                readonly />
+            </div>
+            <p class="field-hint">Role is assigned by administrators</p>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            [disabled]="profileForm.invalid || loading()"
+            class="submit-button">
+            @if (loading()) {
+              <span class="spinner"></span>
+              <span>Saving...</span>
+            } @else {
+              <span>Save Changes</span>
+            }
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Back to Settings -->
+    <div class="settings-footer">
+      <a routerLink="/settings" class="back-link">
+        <span class="material-symbols-rounded">arrow_back</span>
+        <span>Back to Settings</span>
+      </a>
+    </div>
+  </div>
+</div>

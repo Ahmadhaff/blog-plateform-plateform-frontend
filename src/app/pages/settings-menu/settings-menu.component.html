@@ -1,0 +1,46 @@
+<div class="settings-menu-page">
+  <div class="settings-menu-container">
+    <div class="settings-menu-header">
+      <h1 class="settings-menu-title">Settings</h1>
+      <p class="settings-menu-subtitle">Manage your account settings and preferences</p>
+    </div>
+
+    <div class="settings-menu-grid">
+      <!-- Account Settings Card -->
+      <a routerLink="/settings/account" class="settings-card">
+        <div class="settings-card-icon">
+          <span class="material-symbols-rounded">person</span>
+        </div>
+        <div class="settings-card-content">
+          <h2 class="settings-card-title">Account Settings</h2>
+          <p class="settings-card-description">Update your profile information, avatar, and username</p>
+        </div>
+        <div class="settings-card-arrow">
+          <span class="material-symbols-rounded">chevron_right</span>
+        </div>
+      </a>
+
+      <!-- Security Card -->
+      <a routerLink="/settings/security" class="settings-card">
+        <div class="settings-card-icon">
+          <span class="material-symbols-rounded">lock</span>
+        </div>
+        <div class="settings-card-content">
+          <h2 class="settings-card-title">Security</h2>
+          <p class="settings-card-description">Change your password and manage security settings</p>
+        </div>
+        <div class="settings-card-arrow">
+          <span class="material-symbols-rounded">chevron_right</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Back to Home -->
+    <div class="settings-menu-footer">
+      <a routerLink="/" class="back-link">
+        <span class="material-symbols-rounded">arrow_back</span>
+        <span>Back to Home</span>
+      </a>
+    </div>
+  </div>
+</div>

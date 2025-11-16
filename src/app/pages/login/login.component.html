@@ -1,0 +1,117 @@
+<div class="login-page">
+  <div class="login-container">
+    <div class="login-header">
+      <h1 class="login-title">Welcome Back</h1>
+      <p class="login-subtitle">Sign in to continue to MEAN Blog</p>
+    </div>
+
+    <!-- Success Message -->
+    @if (success()) {
+      <div class="message message--success">
+        <span class="material-symbols-rounded">check_circle</span>
+        <span>{{ success() }}</span>
+      </div>
+    }
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="message message--error">
+        <span class="material-symbols-rounded">error</span>
+        <span>{{ error() }}</span>
+      </div>
+    }
+
+    <!-- Loading Overlay -->
+    @if (loading()) {
+      <div class="loading-overlay">
+        <div class="loader">
+          <div class="spinner-large"></div>
+          <p>Signing in...</p>
+        </div>
+      </div>
+    }
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Email Field -->
+      <div class="form-group">
+        <label for="email" class="form-label">Email Address</label>
+        <div class="input-wrapper">
+          <span class="input-icon">
+            <span class="material-symbols-rounded">email</span>
+          </span>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="Enter your email"
+            class="form-input"
+            [class.form-input--error]="emailControl?.invalid && emailControl?.touched"
+            autocomplete="email" />
+        </div>
+        @if (emailControl?.invalid && emailControl?.touched) {
+          <span class="error-text">
+            @if (emailControl?.errors?.['required']) {
+              Email is required
+            } @else if (emailControl?.errors?.['email']) {
+              Please enter a valid email address
+            }
+          </span>
+        }
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <div class="input-wrapper">
+          <span class="input-icon">
+            <span class="material-symbols-rounded">lock</span>
+          </span>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            placeholder="Enter your password"
+            class="form-input"
+            [class.form-input--error]="passwordControl?.invalid && passwordControl?.touched"
+            autocomplete="current-password" />
+        </div>
+        @if (passwordControl?.invalid && passwordControl?.touched) {
+          <span class="error-text">
+            @if (passwordControl?.errors?.['required']) {
+              Password is required
+            } @else if (passwordControl?.errors?.['minlength']) {
+              Password must be at least 8 characters
+            }
+          </span>
+        }
+      </div>
+
+      <!-- Forgot Password Link -->
+      <div class="form-options">
+        <a routerLink="/forgot-password" class="forgot-password">Forgot password?</a>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        [disabled]="loginForm.invalid || loading()"
+        class="submit-button">
+        @if (loading()) {
+          <span class="spinner"></span>
+          <span>Signing in...</span>
+        } @else {
+          <span>Sign In</span>
+        }
+      </button>
+    </form>
+
+    <!-- Register Link -->
+    <div class="login-footer">
+      <p>
+        Don't have an account?
+        <a routerLink="/register" class="register-link">Create an account</a>
+      </p>
+    </div>
+  </div>
+</div>
+

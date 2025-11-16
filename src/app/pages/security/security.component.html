@@ -1,0 +1,159 @@
+<div class="security-page">
+  <div class="security-container">
+    <div class="security-header">
+      <h1 class="security-title">Change Password</h1>
+      <p class="security-subtitle">Update your password to keep your account secure</p>
+    </div>
+
+    <!-- Success Message -->
+    @if (success()) {
+      <div class="message message--success">
+        <span class="material-symbols-rounded">check_circle</span>
+        <span>{{ success() }}</span>
+      </div>
+    }
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="message message--error">
+        <span class="material-symbols-rounded">error</span>
+        <span>{{ error() }}</span>
+      </div>
+    }
+
+    <!-- Loading Overlay -->
+    @if (loading()) {
+      <div class="loading-overlay">
+        <div class="loader">
+          <div class="spinner-large"></div>
+          <p>Changing password...</p>
+        </div>
+      </div>
+    }
+
+    <form [formGroup]="changePasswordForm" (ngSubmit)="onSubmit()" class="change-password-form">
+      <!-- Old Password Field -->
+      <div class="form-group">
+        <label for="oldPassword" class="form-label">Current Password</label>
+        <div class="input-wrapper">
+          <span class="input-icon">
+            <span class="material-symbols-rounded">lock</span>
+          </span>
+          <input
+            id="oldPassword"
+            [type]="showOldPassword() ? 'text' : 'password'"
+            formControlName="oldPassword"
+            placeholder="Enter your current password"
+            class="form-input"
+            [class.form-input--error]="oldPasswordControl?.invalid && oldPasswordControl?.touched"
+            autocomplete="current-password" />
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="toggleOldPasswordVisibility()"
+            aria-label="Toggle password visibility">
+            <span class="material-symbols-rounded">
+              {{ showOldPassword() ? 'visibility_off' : 'visibility' }}
+            </span>
+          </button>
+        </div>
+        @if (oldPasswordControl?.invalid && oldPasswordControl?.touched) {
+          <span class="error-text">Current password is required</span>
+        }
+      </div>
+
+      <!-- New Password Field -->
+      <div class="form-group">
+        <label for="newPassword" class="form-label">New Password</label>
+        <div class="input-wrapper">
+          <span class="input-icon">
+            <span class="material-symbols-rounded">lock</span>
+          </span>
+          <input
+            id="newPassword"
+            [type]="showNewPassword() ? 'text' : 'password'"
+            formControlName="newPassword"
+            placeholder="Enter new password"
+            class="form-input"
+            [class.form-input--error]="(newPasswordControl?.invalid || newPasswordSameAsOldError) && (newPasswordControl?.touched || !!newPasswordControl?.value)"
+            autocomplete="new-password" />
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="toggleNewPasswordVisibility()"
+            aria-label="Toggle password visibility">
+            <span class="material-symbols-rounded">
+              {{ showNewPassword() ? 'visibility_off' : 'visibility' }}
+            </span>
+          </button>
+        </div>
+        @if (newPasswordSameAsOldError) {
+          <span class="error-text">New password must be different from current password</span>
+        } @else if (newPasswordControl?.invalid && (newPasswordControl?.touched || !!newPasswordControl?.value)) {
+          <span class="error-text">
+            @if (newPasswordControl?.errors?.['required']) {
+              New password is required
+            } @else if (newPasswordControl?.errors?.['minlength']) {
+              Password must be at least 8 characters
+            }
+          </span>
+        }
+      </div>
+
+      <!-- Confirm Password Field -->
+      <div class="form-group">
+        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+        <div class="input-wrapper">
+          <span class="input-icon">
+            <span class="material-symbols-rounded">lock</span>
+          </span>
+          <input
+            id="confirmPassword"
+            [type]="showConfirmPassword() ? 'text' : 'password'"
+            formControlName="confirmPassword"
+            placeholder="Confirm new password"
+            class="form-input"
+            [class.form-input--error]="(confirmPasswordControl?.invalid || passwordMismatchError || confirmPasswordSameAsOldError) && (confirmPasswordControl?.touched || !!confirmPasswordControl?.value)"
+            autocomplete="new-password" />
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="toggleConfirmPasswordVisibility()"
+            aria-label="Toggle confirm password visibility">
+            <span class="material-symbols-rounded">
+              {{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}
+            </span>
+          </button>
+        </div>
+        @if (confirmPasswordSameAsOldError) {
+          <span class="error-text">Confirm password must be different from current password</span>
+        } @else if (passwordMismatchError) {
+          <span class="error-text">Passwords do not match</span>
+        } @else if (confirmPasswordControl?.invalid && (confirmPasswordControl?.touched || !!confirmPasswordControl?.value) && !passwordMismatchError) {
+          <span class="error-text">Please confirm your password</span>
+        }
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        [disabled]="!isFormValid() || loading()"
+        class="submit-button">
+        @if (loading()) {
+          <span class="spinner"></span>
+          <span>Changing password...</span>
+        } @else {
+          <span>Change Password</span>
+        }
+      </button>
+    </form>
+
+    <!-- Back Links -->
+    <div class="security-footer">
+      <a routerLink="/settings" class="back-link">
+        <span class="material-symbols-rounded">arrow_back</span>
+        <span>Back to Settings</span>
+      </a>
+    </div>
+  </div>
+</div>

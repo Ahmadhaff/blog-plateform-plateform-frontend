@@ -1,0 +1,122 @@
+<div class="home">
+  <header class="hero" *ngIf="!articles().length">
+    <div class="hero__content">
+      <span class="hero__badge">MEAN Blog</span>
+      <h1 class="hero__title">Discover stories from our community</h1>
+      <p class="hero__subtitle">
+        Explore featured articles, insights, and tutorials published by our editors and writers.
+      </p>
+    </div>
+  </header>
+
+  <section class="articles">
+    <ng-container *ngIf="loading(); else loadedContent">
+      <div class="articles__state">
+        <span class="spinner" aria-hidden="true"></span>
+        <p>Loading articles...</p>
+      </div>
+    </ng-container>
+
+    <ng-template #loadedContent>
+      <div *ngIf="error(); else articleList" class="articles__state error">
+        <p>{{ error() }}</p>
+      </div>
+    </ng-template>
+
+    <ng-template #articleList>
+      <div *ngIf="articles().length; else emptyState" class="articles__grid">
+        <a class="article-card" *ngFor="let article of articles(); trackBy: trackByArticleId" [routerLink]="['/article', article.id]">
+          <article class="article-card__wrapper">
+          <div class="article-card__image" *ngIf="hasImage(article); else placeholderImage">
+            <img [src]="article.imageUrl!"
+                 [alt]="article.title"
+                 loading="lazy"
+                 decoding="async"
+                 (error)="onImageError(article.id)" />
+          </div>
+          <ng-template #placeholderImage>
+            <div class="article-card__image placeholder" aria-hidden="true">
+              <span>{{ article.title | slice:0:1 }}</span>
+            </div>
+          </ng-template>
+
+          <div class="article-card__body">
+            <h2 class="article-card__title">
+              {{ article.title }}
+            </h2>
+            <p class="article-card__excerpt">{{ article.content | slice:0:180 }}{{ article.content.length > 180 ? '…' : '' }}</p>
+
+            <div class="article-card__meta">
+              <div class="article-card__author" *ngIf="article.author as author">
+                <div class="avatar">
+                  @if (author?.avatar) {
+                    <img 
+                      [src]="author.avatar" 
+                      [alt]="author?.username || 'Article author'" 
+                      loading="lazy"
+                      (error)="$any($event.target).src = 'assets/images/default-avatar.svg'" />
+                  } @else {
+                    <img 
+                      src="assets/images/default-avatar.svg" 
+                      [alt]="author?.username || 'Article author'" 
+                      class="avatar-image" />
+                  }
+                </div>
+                <div class="author__info">
+                  <span class="name">{{ author?.username || 'Anonymous' }}</span>
+                  <span class="role">{{ author?.role || 'Contributor' }}</span>
+                </div>
+              </div>
+
+              <div class="article-card__stats" aria-label="Article metrics">
+                <span>{{ article.views }} views</span>
+                <span>{{ article.likesCount }} likes</span>
+                <span>{{ article.commentCount }} comments</span>
+              </div>
+
+              <!-- Like Button -->
+              <div class="article-card__actions">
+                @if (isAuthenticated()) {
+                  <button
+                    type="button"
+                    (click)="toggleArticleLike($event, article)"
+                    class="article-like-btn"
+                    [class.article-like-btn--liked]="hasLikedArticle(article)"
+                    title="Like this article">
+                    <span class="material-symbols-rounded">favorite</span>
+                    @if (article.likesCount > 0) {
+                      <span>{{ article.likesCount }}</span>
+                    }
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    (click)="toggleArticleLike($event, article)"
+                    class="article-like-btn"
+                    title="Log in to like this article">
+                    <span class="material-symbols-rounded">favorite</span>
+                    @if (article.likesCount > 0) {
+                      <span>{{ article.likesCount }}</span>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div class="article-card__tags" *ngIf="article.tags.length">
+              <span class="tag" *ngFor="let tag of article.tags">{{ tag }}</span>
+            </div>
+          </div>
+          </article>
+        </a>
+      </div>
+
+      <ng-template #emptyState>
+        <div class="articles__state empty">
+          <p>No articles published yet. Check back soon!</p>
+        </div>
+      </ng-template>
+    </ng-template>
+  </section>
+</div>
+

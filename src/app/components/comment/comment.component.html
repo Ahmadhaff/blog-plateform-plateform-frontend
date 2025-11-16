@@ -1,0 +1,120 @@
+<div class="comment" [style.margin-left.px]="getIndent()" [id]="'comment-' + comment._id">
+  @if (editingComment?._id === comment._id) {
+    <!-- Edit Form -->
+    <form [formGroup]="editForm" (ngSubmit)="onSaveEdit()" class="comment-edit">
+      <textarea
+        formControlName="content"
+        rows="3"
+        class="comment-edit__textarea">
+      </textarea>
+      @if (editForm.get('content')?.invalid && editForm.get('content')?.touched) {
+        <div class="error">Content is required (max 1000 characters)</div>
+      }
+      <div class="comment-edit__actions">
+        <button type="submit" [disabled]="editForm.invalid" class="btn btn-primary">
+          Save
+        </button>
+        <button type="button" (click)="onCancelEdit()" class="btn btn-secondary">
+          Cancel
+        </button>
+      </div>
+    </form>
+  } @else {
+    <!-- Comment Content -->
+    <div class="comment__header">
+      <div class="comment__author">
+        <img
+          [src]="getAvatarUrl(comment.author.avatar)"
+          (error)="onAvatarError($event)"
+          [alt]="comment.author.username"
+          class="comment__avatar" />
+        <span class="comment__username">{{ comment.author.username }}</span>
+        <span class="comment__date">{{ comment.createdAt | date:'short' }}</span>
+      </div>
+    </div>
+
+    <div class="comment__content">
+      {{ comment.content }}
+    </div>
+
+    <div class="comment__actions">
+      <button
+        type="button"
+        (click)="onLike()"
+        class="comment-action"
+        [class.comment-action--liked]="hasLiked()">
+        <span class="material-symbols-rounded">favorite</span>
+        @if (getLikesCount() > 0) {
+          <span>{{ getLikesCount() }}</span>
+        }
+      </button>
+
+      @if (canReply()) {
+        <button type="button" (click)="onReply()" class="comment-action">
+          <span class="material-symbols-rounded">reply</span>
+          Reply
+        </button>
+      }
+
+      @if (isAuthor()) {
+        <button type="button" (click)="onEdit()" class="comment-action">
+          <span class="material-symbols-rounded">edit</span>
+          Edit
+        </button>
+        <button type="button" (click)="onDelete()" class="comment-action comment-action--danger">
+          <span class="material-symbols-rounded">delete</span>
+          Delete
+        </button>
+      }
+    </div>
+
+    <!-- Reply Form -->
+    @if (replyingTo?._id === comment._id) {
+      <form [formGroup]="replyForm" (ngSubmit)="onPostReply()" class="comment-reply">
+        <textarea
+          formControlName="content"
+          rows="3"
+          placeholder="Write a reply..."
+          class="comment-reply__textarea">
+        </textarea>
+        @if (replyForm.get('content')?.invalid && replyForm.get('content')?.touched) {
+          <div class="error">Reply is required (max 1000 characters)</div>
+        }
+        <div class="comment-reply__actions">
+          <button type="submit" [disabled]="replyForm.invalid" class="btn btn-primary">
+            Post Reply
+          </button>
+          <button type="button" (click)="onCancelReply()" class="btn btn-secondary">
+            Cancel
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- Nested Replies (Recursive) -->
+    @if (getReplies().length > 0) {
+      <div class="comment__replies">
+        @for (replyComment of getReplies(); track trackByCommentId($index, replyComment)) {
+          <app-comment
+            [comment]="replyComment"
+            [depth]="depth + 1"
+            [replyingTo]="replyingTo"
+            [editingComment]="editingComment"
+            [replyForm]="replyForm"
+            [editForm]="editForm"
+            [currentUserId]="currentUserId"
+            (reply)="reply.emit($event)"
+            (cancelReply)="cancelReply.emit()"
+            (postReply)="postReply.emit($event)"
+            (edit)="edit.emit($event)"
+            (cancelEdit)="cancelEdit.emit()"
+            (saveEdit)="saveEdit.emit($event)"
+            (delete)="delete.emit($event)"
+            (like)="like.emit($event)">
+          </app-comment>
+        }
+      </div>
+    }
+  }
+</div>
+

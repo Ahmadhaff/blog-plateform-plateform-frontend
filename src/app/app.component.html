@@ -1,0 +1,141 @@
+<div class="app-shell">
+  <header class="app-header">
+    <div class="app-header__brand">
+      <span class="logo">MEAN Blog</span>
+      <span class="tagline">Stories curated for everyone</span>
+    </div>
+    
+    <!-- Mobile Menu Toggle -->
+    <button 
+      type="button" 
+      class="mobile-menu-toggle" 
+      (click)="toggleMobileMenu()"
+      aria-label="Toggle menu">
+      <i class="material-symbols-rounded">{{ mobileMenuOpen() ? 'close' : 'menu' }}</i>
+    </button>
+
+    <!-- Mobile Menu Backdrop -->
+    @if (mobileMenuOpen()) {
+      <div class="mobile-menu-backdrop" (click)="closeMobileMenu()"></div>
+    }
+
+    <!-- Navigation -->
+    <nav class="app-header__nav" [class.mobile-menu-open]="mobileMenuOpen()">
+      <a routerLink="/" routerLinkActive="active" (click)="closeMobileMenu()" aria-label="Home">Home</a>
+      @if (isAuthenticated() && isRedacteur()) {
+        <a routerLink="/my-articles" routerLinkActive="active" (click)="closeMobileMenu()" aria-label="My Articles">My Articles</a>
+      }
+      <a href="#" (click)="closeMobileMenu(); $event.preventDefault()" aria-label="Explore articles">Explore</a>
+      <a href="#" (click)="closeMobileMenu(); $event.preventDefault()" aria-label="Learn about us">About</a>
+    </nav>
+    <div class="app-header__actions">
+      @if (isAuthenticated()) {
+        <div class="notification-container">
+          <button 
+            type="button" 
+            class="icon-button notification-button" 
+            [class.has-notifications]="notificationCount() > 0"
+            (click)="toggleNotificationDropdown()"
+            aria-label="Notifications">
+            <i class="material-symbols-rounded">notifications</i>
+            @if (notificationCount() > 0) {
+              <span class="notification-badge">{{ notificationCount() > 99 ? '99+' : notificationCount() }}</span>
+            }
+          </button>
+          
+          @if (showNotificationDropdown()) {
+            <div class="notification-dropdown" (click)="$event.stopPropagation()">
+              <div class="notification-dropdown__header">
+                <h3>Notifications</h3>
+                @if (notificationCount() > 0) {
+                  <button 
+                    type="button" 
+                    class="mark-all-read-btn"
+                    (click)="markAllAsRead()">
+                    Mark all as read
+                  </button>
+                }
+              </div>
+              <div class="notification-dropdown__body">
+                @if (notifications().length > 0) {
+                  @for (notification of notifications(); track notification._id || notification.id) {
+                    <div 
+                      class="notification-item"
+                      [class.unread]="!notification.read"
+                      (click)="onNotificationClick(notification)">
+                      <div class="notification-item__icon">
+                        @switch (notification.type) {
+                          @case ('new_article') {
+                            <i class="material-symbols-rounded">article</i>
+                          }
+                          @case ('new_comment') {
+                            <i class="material-symbols-rounded">comment</i>
+                          }
+                          @case ('comment_reply') {
+                            <i class="material-symbols-rounded">reply</i>
+                          }
+                          @case ('article_liked') {
+                            <i class="material-symbols-rounded">favorite</i>
+                          }
+                          @case ('comment_liked') {
+                            <i class="material-symbols-rounded">thumb_up</i>
+                          }
+                          @default {
+                            <i class="material-symbols-rounded">notifications</i>
+                          }
+                        }
+                      </div>
+                      <div class="notification-item__content">
+                        <div class="notification-item__title">{{ notification.title }}</div>
+                        <div class="notification-item__message">{{ notification.message }}</div>
+                        <div class="notification-item__time">{{ notification.createdAt | date:'short' }}</div>
+                      </div>
+                      @if (!notification.read) {
+                        <div class="notification-item__indicator"></div>
+                      }
+                    </div>
+                  }
+                } @else {
+                  <div class="notification-empty">
+                    <i class="material-symbols-rounded">notifications_off</i>
+                    <p>No notifications</p>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+        <a routerLink="/settings" class="icon-button" aria-label="Settings" title="Settings">
+          <i class="material-symbols-rounded">settings</i>
+        </a>
+        <button type="button" class="avatar" aria-label="User menu">
+          @if (currentUser()?.avatar && !avatarError()) {
+            <img 
+              [src]="currentUser()?.avatar" 
+              [alt]="currentUser()?.username || 'User'" 
+              class="avatar-image"
+              (error)="onAvatarError()" />
+          } @else {
+            <img 
+              src="assets/images/default-avatar.svg" 
+              [alt]="currentUser()?.username || 'User'" 
+              class="avatar-image" />
+          }
+        </button>
+        <button type="button" class="logout-button" (click)="logout()" aria-label="Logout">
+          Logout
+        </button>
+      } @else {
+        <a routerLink="/login" class="login-button">Sign In</a>
+      }
+    </div>
+  </header>
+
+  <main class="app-content">
+    <router-outlet />
+  </main>
+
+  <footer class="app-footer">
+    <p>© {{ currentYear }} MEAN Blog Platform. All rights reserved.</p>
+  </footer>
+</div>

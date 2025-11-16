@@ -1,0 +1,246 @@
+<div class="my-articles">
+  <div class="my-articles__header">
+    <div class="header-content">
+      <div>
+        <h1>My Articles</h1>
+        <p class="subtitle">Manage your articles and track their performance</p>
+      </div>
+      <button (click)="startCreate()" class="btn btn-primary" [disabled]="creatingArticle()">
+        + Create Article
+      </button>
+    </div>
+  </div>
+
+  <!-- Create Article Form -->
+  @if (creatingArticle()) {
+    <div class="article-item create-form-container">
+      <h2>Create New Article</h2>
+      <form [formGroup]="createForm" (ngSubmit)="saveCreate()" class="edit-form">
+        <div class="form-group">
+          <label for="create-title">Title</label>
+          <input
+            id="create-title"
+            type="text"
+            formControlName="title"
+            class="form-input"
+            placeholder="Article title" />
+          @if (createForm.get('title')?.invalid && createForm.get('title')?.touched) {
+            <span class="error-text">Title is required (max 200 characters)</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="create-content">Content</label>
+          <textarea
+            id="create-content"
+            formControlName="content"
+            class="form-textarea"
+            rows="10"
+            placeholder="Article content"></textarea>
+          @if (createForm.get('content')?.invalid && createForm.get('content')?.touched) {
+            <span class="error-text">Content is required</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="create-tags">Tags (comma-separated)</label>
+          <input
+            id="create-tags"
+            type="text"
+            formControlName="tags"
+            class="form-input"
+            placeholder="tag1, tag2, tag3" />
+          @if (createForm.get('tags')?.invalid && createForm.get('tags')?.touched) {
+            <span class="error-text">At least one tag is required</span>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="create-status">Status</label>
+            <select id="create-status" formControlName="status" class="form-select">
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="create-image">Image <span class="required">*</span></label>
+            <input
+              id="create-image"
+              type="file"
+              accept="image/*"
+              (change)="onCreateImageSelected($event)"
+              class="form-file" />
+            @if (createForm.get('image')?.invalid && createForm.get('image')?.touched) {
+              <span class="error-text">Image is required</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" (click)="cancelCreate()" class="btn btn-secondary">
+            Cancel
+          </button>
+          <button type="submit" [disabled]="createForm.invalid || loading()" class="btn btn-primary">
+            @if (loading()) {
+              Creating...
+            } @else {
+              Create Article
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading">Loading articles...</div>
+  } @else if (error()) {
+    <div class="error">{{ error() }}</div>
+    <button (click)="loadMyArticles()" class="retry-btn">Retry</button>
+  } @else if (articles().length === 0) {
+    <div class="empty-state">
+      <p>You haven't created any articles yet.</p>
+      <a routerLink="/" class="home-link">Browse articles</a>
+    </div>
+  } @else {
+    <div class="articles-list">
+      @for (article of articles(); track trackByArticleId($index, article)) {
+        <div class="article-item">
+          @if (editingArticle()?.id === article.id) {
+            <!-- Edit Form -->
+            <form [formGroup]="editForm" (ngSubmit)="saveEdit()" class="edit-form">
+              <div class="form-group">
+                <label for="title">Title</label>
+                <input
+                  id="title"
+                  type="text"
+                  formControlName="title"
+                  class="form-input"
+                  placeholder="Article title" />
+                @if (editForm.get('title')?.invalid && editForm.get('title')?.touched) {
+                  <span class="error-text">Title is required (max 200 characters)</span>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="content">Content</label>
+                <textarea
+                  id="content"
+                  formControlName="content"
+                  class="form-textarea"
+                  rows="10"
+                  placeholder="Article content"></textarea>
+                @if (editForm.get('content')?.invalid && editForm.get('content')?.touched) {
+                  <span class="error-text">Content is required</span>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="tags">Tags (comma-separated)</label>
+                <input
+                  id="tags"
+                  type="text"
+                  formControlName="tags"
+                  class="form-input"
+                  placeholder="tag1, tag2, tag3" />
+                @if (editForm.get('tags')?.invalid && editForm.get('tags')?.touched) {
+                  <span class="error-text">At least one tag is required</span>
+                }
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="status">Status</label>
+                  <select id="status" formControlName="status" class="form-select">
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="image">Image (optional)</label>
+                  <input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    (change)="onImageSelected($event)"
+                    class="form-file" />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" (click)="cancelEdit()" class="btn btn-secondary">
+                  Cancel
+                </button>
+                <button type="submit" [disabled]="editForm.invalid || loading()" class="btn btn-primary">
+                  @if (loading()) {
+                    Saving...
+                  } @else {
+                    Save Changes
+                  }
+                </button>
+              </div>
+            </form>
+          } @else {
+            <!-- Article Display -->
+            <div class="article-display">
+              <div class="article-header">
+                <h2 class="article-title">
+                  <a [routerLink]="['/article', article.id]">{{ article.title }}</a>
+                </h2>
+                <span class="article-status" [class.status-published]="article.status === 'published'"
+                      [class.status-draft]="article.status === 'draft'"
+                      [class.status-archived]="article.status === 'archived'">
+                  {{ article.status }}
+                </span>
+              </div>
+
+              @if (article.imageUrl) {
+                <div class="article-image">
+                  <img [src]="article.imageUrl" [alt]="article.title" />
+                </div>
+              }
+
+              <div class="article-content" [innerHTML]="article.content | slice:0:300"></div>
+              @if (article.content.length > 300) {
+                <span>...</span>
+              }
+
+              <div class="article-meta">
+                <span>Views: {{ article.views }}</span>
+                <span>Likes: {{ article.likesCount }}</span>
+                <span>Comments: {{ article.commentCount }}</span>
+                <span>Created: {{ article.createdAt | date:'short' }}</span>
+              </div>
+
+              @if (article.tags && article.tags.length > 0) {
+                <div class="article-tags">
+                  @for (tag of article.tags; track tag) {
+                    <span class="tag">{{ tag }}</span>
+                  }
+                </div>
+              }
+
+              <div class="article-actions">
+                <a [routerLink]="['/article', article.id]" class="btn btn-secondary btn-sm">
+                  View
+                </a>
+                <button (click)="startEdit(article)" class="btn btn-primary btn-sm">
+                  Edit
+                </button>
+                <button (click)="deleteArticle(article)" class="btn btn-danger btn-sm">
+                  Delete
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+

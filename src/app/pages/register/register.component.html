@@ -1,0 +1,205 @@
+<div class="register-page">
+  <div class="register-container">
+    <div class="register-header">
+      <h1 class="register-title">Create Account</h1>
+      <p class="register-subtitle">Join MEAN Blog and start sharing your stories</p>
+    </div>
+
+    <!-- Success Message -->
+    @if (success()) {
+      <div class="message message--success">
+        <span class="material-symbols-rounded">check_circle</span>
+        <span>{{ success() }}</span>
+      </div>
+    }
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="message message--error">
+        <span class="material-symbols-rounded">error</span>
+        <span>{{ error() }}</span>
+      </div>
+    }
+
+    <!-- Loading Overlay -->
+    @if (loading()) {
+      <div class="loading-overlay">
+        <div class="loader">
+          <div class="spinner-large"></div>
+          <p>Creating your account...</p>
+        </div>
+      </div>
+    }
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+      <!-- Username Field -->
+      <div class="form-group">
+        <label for="username" class="form-label">Username</label>
+        <div class="input-wrapper">
+          <span class="input-icon">
+            <span class="material-symbols-rounded">person</span>
+          </span>
+          <input
+            id="username"
+            type="text"
+            formControlName="username"
+            placeholder="Choose a username"
+            class="form-input"
+            [class.form-input--error]="usernameControl?.invalid && usernameControl?.touched"
+            autocomplete="username" />
+        </div>
+        @if (usernameControl?.invalid && usernameControl?.touched) {
+          <span class="error-text">
+            @if (usernameControl?.errors?.['required']) {
+              Username is required
+            } @else if (usernameControl?.errors?.['minlength']) {
+              Username must be at least 3 characters
+            } @else if (usernameControl?.errors?.['maxlength']) {
+              Username must be at most 50 characters
+            }
+          </span>
+        }
+      </div>
+
+      <!-- Email Field -->
+      <div class="form-group">
+        <label for="email" class="form-label">Email Address</label>
+        <div class="input-wrapper">
+          <span class="input-icon">
+            <span class="material-symbols-rounded">email</span>
+          </span>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="Enter your email"
+            class="form-input"
+            [class.form-input--error]="emailControl?.invalid && emailControl?.touched"
+            autocomplete="email" />
+        </div>
+        @if (emailControl?.invalid && emailControl?.touched) {
+          <span class="error-text">
+            @if (emailControl?.errors?.['required']) {
+              Email is required
+            } @else if (emailControl?.errors?.['email']) {
+              Please enter a valid email address
+            }
+          </span>
+        }
+      </div>
+
+      <!-- Role Field -->
+      <div class="form-group">
+        <label for="role" class="form-label">Role</label>
+        <div class="input-wrapper">
+          <span class="input-icon">
+            <span class="material-symbols-rounded">badge</span>
+          </span>
+          <select
+            id="role"
+            formControlName="role"
+            class="form-input form-input--select"
+            [class.form-input--error]="roleControl?.invalid && roleControl?.touched">
+            @for (roleOption of roles; track roleOption.value) {
+              <option [value]="roleOption.value">{{ roleOption.label }}</option>
+            }
+          </select>
+        </div>
+        @if (roleControl?.invalid && roleControl?.touched) {
+          <span class="error-text">Role is required</span>
+        }
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <div class="input-wrapper">
+          <span class="input-icon">
+            <span class="material-symbols-rounded">lock</span>
+          </span>
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Create a password"
+            class="form-input"
+            [class.form-input--error]="passwordControl?.invalid && passwordControl?.touched"
+            autocomplete="new-password" />
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePasswordVisibility()"
+            aria-label="Toggle password visibility">
+            <span class="material-symbols-rounded">
+              {{ showPassword() ? 'visibility_off' : 'visibility' }}
+            </span>
+          </button>
+        </div>
+        @if (passwordControl?.invalid && passwordControl?.touched) {
+          <span class="error-text">
+            @if (passwordControl?.errors?.['required']) {
+              Password is required
+            } @else if (passwordControl?.errors?.['minlength']) {
+              Password must be at least 8 characters
+            }
+          </span>
+        }
+      </div>
+
+      <!-- Confirm Password Field -->
+      <div class="form-group">
+        <label for="confirmPassword" class="form-label">Confirm Password</label>
+        <div class="input-wrapper">
+          <span class="input-icon">
+            <span class="material-symbols-rounded">lock</span>
+          </span>
+          <input
+            id="confirmPassword"
+            [type]="showConfirmPassword() ? 'text' : 'password'"
+            formControlName="confirmPassword"
+            placeholder="Confirm your password"
+            class="form-input"
+            [class.form-input--error]="(confirmPasswordControl?.invalid || passwordMismatchError) && confirmPasswordControl?.touched"
+            autocomplete="new-password" />
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="toggleConfirmPasswordVisibility()"
+            aria-label="Toggle confirm password visibility">
+            <span class="material-symbols-rounded">
+              {{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}
+            </span>
+          </button>
+        </div>
+        @if (passwordMismatchError) {
+          <span class="error-text">Passwords do not match</span>
+        }
+        @if (confirmPasswordControl?.invalid && confirmPasswordControl?.touched && !passwordMismatchError) {
+          <span class="error-text">Please confirm your password</span>
+        }
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        [disabled]="registerForm.invalid || loading()"
+        class="submit-button">
+        @if (loading()) {
+          <span class="spinner"></span>
+          <span>Creating account...</span>
+        } @else {
+          <span>Create Account</span>
+        }
+      </button>
+    </form>
+
+    <!-- Login Link -->
+    <div class="register-footer">
+      <p>
+        Already have an account?
+        <a routerLink="/login" class="login-link">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>
+

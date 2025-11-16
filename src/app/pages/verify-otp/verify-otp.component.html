@@ -1,0 +1,156 @@
+<div class="verify-otp-page">
+  <div class="verify-otp-container">
+    <div class="verify-otp-header">
+      @if (otpType() === 'password_reset') {
+        <h1 class="verify-otp-title">Reset Your Password</h1>
+        @if (otpSent()) {
+          <p class="verify-otp-subtitle">
+            We've sent a verification code to<br>
+            <strong>{{ email() }}</strong>
+          </p>
+        } @else {
+          <p class="verify-otp-subtitle">
+            Click the button below to receive<br>
+            a verification code at<br>
+            <strong>{{ email() }}</strong>
+          </p>
+        }
+      } @else {
+        <h1 class="verify-otp-title">Verify Your Email</h1>
+        @if (otpSent()) {
+          <p class="verify-otp-subtitle">
+            We've sent a verification code to<br>
+            <strong>{{ email() }}</strong>
+          </p>
+        } @else {
+          <p class="verify-otp-subtitle">
+            Click the button below to receive<br>
+            a verification code at<br>
+            <strong>{{ email() }}</strong>
+          </p>
+        }
+      }
+    </div>
+
+    <!-- Success Message - Only show for verification success, not for sending code -->
+    @if (success() && otpSent()) {
+      <div class="message message--success">
+        <span class="material-symbols-rounded">check_circle</span>
+        <span>{{ success() }}</span>
+      </div>
+    }
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="message message--error">
+        <span class="material-symbols-rounded">error</span>
+        <span>{{ error() }}</span>
+      </div>
+    }
+
+    <!-- Loading Overlay -->
+    @if (sendingOtp() || loading()) {
+      <div class="loading-overlay">
+        <div class="loader">
+          <div class="spinner-large"></div>
+          <p>{{ sendingOtp() ? 'Sending verification code...' : 'Verifying code...' }}</p>
+        </div>
+      </div>
+    }
+
+    <!-- Send Code Button -->
+    @if (!otpSent()) {
+      <div class="send-code-section">
+        <button
+          type="button"
+          (click)="sendOtp()"
+          [disabled]="sendingOtp() || !email()"
+          class="send-code-button">
+          @if (sendingOtp()) {
+            <span class="spinner"></span>
+            <span>Sending...</span>
+          } @else {
+            <span class="material-symbols-rounded">mail</span>
+            <span>Send Verification Code</span>
+          }
+        </button>
+      </div>
+    }
+
+    @if (otpSent()) {
+      <form [formGroup]="otpForm" (ngSubmit)="onSubmit()" class="verify-otp-form">
+        <!-- OTP Code Fields (6 separate inputs) -->
+        <div class="form-group">
+          <label class="form-label">Verification Code</label>
+          <div class="otp-input-container">
+            @for (field of otpFields; track field; let i = $index) {
+              <input
+                [id]="'otp-' + i"
+                type="text"
+                [formControlName]="field"
+                class="otp-digit-input"
+                [class.otp-digit-input--error]="getOtpControl(i)?.invalid && getOtpControl(i)?.touched"
+                maxlength="1"
+                pattern="[0-9]*"
+                inputmode="numeric"
+                autocomplete="off"
+                (input)="onOtpInput($event, i)"
+                (keydown)="onOtpKeyDown($event, i)"
+                [attr.aria-label]="'Digit ' + (i + 1) + ' of verification code'" />
+            }
+          </div>
+          @if (otpForm.invalid && otpForm.touched) {
+            <span class="error-text">Please enter all 6 digits</span>
+          }
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          [disabled]="!isFormComplete() || loading()"
+          class="submit-button">
+          @if (loading()) {
+            <span class="spinner"></span>
+            <span>Verifying...</span>
+          } @else {
+            <span>Verify Email</span>
+          }
+        </button>
+
+        <!-- Resend Code -->
+        <div class="resend-section">
+          <p class="resend-text">
+            Didn't receive the code?
+            @if (canResend()) {
+              <button type="button" class="resend-button" (click)="sendOtp()" [disabled]="sendingOtp()">
+                @if (sendingOtp()) {
+                  <span>Sending...</span>
+                } @else {
+                  <span>Resend Code</span>
+                }
+              </button>
+            } @else {
+              <span class="cooldown-text">Resend code in {{ resendCooldown() }}s</span>
+            }
+          </p>
+        </div>
+      </form>
+    }
+
+    <!-- Back Links -->
+    <div class="verify-otp-footer">
+      @if (otpType() === 'password_reset') {
+        <p>
+          Remember your password?
+          <a routerLink="/login" class="back-link">Go back to login</a>
+        </p>
+      } @else {
+        <p>
+          Wrong email?
+          <a routerLink="/register" class="back-link">Go back to registration</a>
+        </p>
+      }
+    </div>
+  </div>
+</div>
+
