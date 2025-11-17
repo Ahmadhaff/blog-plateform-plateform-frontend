@@ -12,7 +12,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   z-index: 1;
 
   // Animated gradient overlay
@@ -129,6 +130,7 @@
   position: relative;
   z-index: 1;
   transition: padding 0.3s ease;
+  margin: auto; // Center the container
 
   @media (max-width: 640px) {
     border-radius: 20px;
@@ -138,7 +140,7 @@
   @media (max-width: 480px) {
     padding: 1.75rem 1.25rem;
     border-radius: 16px;
-    margin: 0 0.5rem;
+    margin: auto 0.5rem; // Center with margin on small screens
   }
 }
 
@@ -336,7 +338,7 @@
 .submit-button {
   width: 100%;
   padding: 0.9375rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -349,11 +351,12 @@
   justify-content: center;
   gap: 0.75rem;
   margin-top: 0.5rem;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 
   &:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   }
 
   &:active:not(:disabled) {
