@@ -131,7 +131,16 @@ export class AppComponent implements OnInit, OnDestroy {
                 this.isRefreshing = false;
                 console.error('❌ Failed to refresh access token:', error);
                 
-                // Check if refresh token also expired
+                // If refresh fails with 401 or invalid token error, logout immediately
+                if (error.status === 401 || 
+                    error.error?.error?.toLowerCase().includes('invalid') ||
+                    error.error?.error?.toLowerCase().includes('expired')) {
+                  console.error('❌ Refresh token is invalid or expired - Logging out');
+                  this.logout();
+                  return;
+                }
+                
+                // Check if refresh token also expired by parsing it
                 const refreshToken = this.authService.getRefreshToken();
                 if (refreshToken) {
                   try {
@@ -139,11 +148,18 @@ export class AppComponent implements OnInit, OnDestroy {
                     const refreshExp = refreshPayload.exp;
 
                     if (refreshExp && now >= refreshExp) {
+                      console.error('❌ Refresh token expired - Logging out');
                       this.logout();
                     }
                   } catch (e) {
                     console.error('❌ Error parsing refresh token:', e);
+                    // If we can't parse the token, it's likely invalid - logout
+                    this.logout();
                   }
+                } else {
+                  // No refresh token available - logout
+                  console.error('❌ No refresh token available - Logging out');
+                  this.logout();
                 }
               }
             });

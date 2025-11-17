@@ -156,6 +156,9 @@ export class AuthService {
           }
         } else {
           console.error('❌ No accessToken in refresh response');
+          // Clear session if refresh response is invalid
+          this.clearLocalStorage();
+          throw new Error('Invalid refresh response');
         }
       })
     );

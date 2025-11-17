@@ -82,12 +82,29 @@ const authInterceptorFn: HttpInterceptorFn = (req, next) => {
                 });
                 return next(retryRequest);
               }
-              return throwError(() => error);
-            }),
-            catchError((refreshError) => {
-              console.error('❌ Token refresh failed');
+              // No access token in response - session expired
+              console.error('❌ No access token in refresh response');
               authService.clearLocalStorage();
               router.navigate(['/login']);
+              return throwError(() => new Error('No access token in refresh response'));
+            }),
+            catchError((refreshError: any) => {
+              console.error('❌ Token refresh failed:', refreshError);
+              
+              // Handle refresh token failure - always logout on 401 or invalid token
+              if (refreshError.status === 401 || 
+                  refreshError.error?.error?.toLowerCase().includes('invalid') ||
+                  refreshError.error?.error?.toLowerCase().includes('expired')) {
+                console.error('❌ Refresh token is invalid or expired - Logging out');
+                authService.clearLocalStorage();
+                router.navigate(['/login']);
+              } else {
+                // Network error or other issue - still clear session to be safe
+                console.warn('⚠️ Token refresh failed with non-401 error - Clearing session');
+                authService.clearLocalStorage();
+                router.navigate(['/login']);
+              }
+              
               return throwError(() => refreshError);
             })
           );
