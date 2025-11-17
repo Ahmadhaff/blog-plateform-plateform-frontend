@@ -385,6 +385,15 @@
     line-height: 1.6;
     color: #475569;
     pointer-events: none;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    max-height: calc(1.6em * 3);
   }
 
   &__meta {

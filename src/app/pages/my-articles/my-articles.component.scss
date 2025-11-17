@@ -295,9 +295,33 @@
     color: #475569;
     line-height: 1.6;
     margin-bottom: 1rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+    max-height: calc(1.6em * 4);
 
     :deep(p) {
       margin: 0;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+
+    :deep(*) {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      max-width: 100%;
+    }
+
+    :deep(img) {
+      max-width: 100%;
+      height: auto;
     }
   }
 

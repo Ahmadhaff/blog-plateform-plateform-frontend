@@ -120,37 +120,87 @@
   }
 
   &__full-content {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    overflow-x: hidden;
+    max-width: 100%;
+
     // Style content HTML elements
     :deep(p) {
       margin-bottom: 1rem;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      max-width: 100%;
       
       &:last-child {
         margin-bottom: 0;
       }
     }
 
-    :deep(h1), :deep(h2), :deep(h3) {
+    :deep(h1), :deep(h2), :deep(h3), :deep(h4), :deep(h5), :deep(h6) {
       margin-top: 1.5rem;
       margin-bottom: 0.75rem;
       color: #0f172a;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      max-width: 100%;
     }
 
     :deep(ul), :deep(ol) {
       margin: 1rem 0;
       padding-left: 2rem;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      max-width: 100%;
     }
 
     :deep(li) {
       margin-bottom: 0.5rem;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     :deep(a) {
       color: #3b82f6;
       text-decoration: none;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
       
       &:hover {
         text-decoration: underline;
       }
+    }
+
+    :deep(img) {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 1rem 0;
+    }
+
+    :deep(pre), :deep(code) {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: pre-wrap;
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    :deep(table) {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      display: block;
+      word-wrap: break-word;
+    }
+
+    :deep(*) {
+      max-width: 100%;
+      box-sizing: border-box;
     }
   }
 
