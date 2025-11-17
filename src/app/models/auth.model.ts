@@ -36,28 +36,6 @@ export interface RegisterResponse {
   refreshToken: string;
 }
 
-export interface SendOtpRequest {
-  email: string;
-  type?: 'email_verification' | 'password_reset';
-}
-
-export interface SendOtpResponse {
-  message: string;
-}
-
-export interface VerifyOtpRequest {
-  email: string;
-  code: string;
-  type?: 'email_verification' | 'password_reset';
-  token?: string; // Required for password_reset type
-}
-
-export interface VerifyOtpResponse {
-  message: string;
-  token?: string; // For password_reset type
-  expiresInMinutes?: number; // For password_reset type
-}
-
 export interface ResetPasswordRequest {
   password: string;
   confirmPassword: string;

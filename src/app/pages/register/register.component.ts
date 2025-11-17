@@ -78,11 +78,11 @@ export class RegisterComponent {
         sessionStorage.setItem('pendingLoginEmail', email);
         sessionStorage.setItem('pendingLoginPassword', password);
         
-        // Don't show success message - redirect immediately to verify OTP
-        // The verify page will show appropriate messages
-        this.router.navigate(['/verify-otp'], {
-          queryParams: { email: email }
-        });
+        // Show success message and redirect to login
+        this.success.set('Registration successful! Redirecting to login...');
+        setTimeout(() => {
+          this.router.navigate(['/login']);
+        }, 1500);
       },
       error: (error) => {
         this.loading.set(false);

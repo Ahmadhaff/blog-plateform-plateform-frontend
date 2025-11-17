@@ -9,10 +9,6 @@ import {
   LoginResponse, 
   RegisterRequest, 
   RegisterResponse,
-  SendOtpRequest,
-  SendOtpResponse,
-  VerifyOtpRequest,
-  VerifyOtpResponse,
   ResetPasswordRequest,
   ResetPasswordResponse
 } from '../models/auth.model';
@@ -52,16 +48,6 @@ export class AuthService {
         }
       })
     );
-  }
-
-  sendOtp(email: string, type: 'email_verification' | 'password_reset' = 'email_verification'): Observable<SendOtpResponse> {
-    const body: SendOtpRequest = { email, type };
-    return this.http.post<SendOtpResponse>(`${this.baseUrl}/otp/send`, body);
-  }
-
-  verifyOtp(email: string, code: string, type: 'email_verification' | 'password_reset' = 'email_verification', token?: string): Observable<VerifyOtpResponse> {
-    const body: VerifyOtpRequest = { email, code, type, ...(token && { token }) };
-    return this.http.post<VerifyOtpResponse>(`${this.baseUrl}/otp/verify`, body);
   }
 
   resetPassword(password: string, confirmPassword: string, token: string): Observable<ResetPasswordResponse> {

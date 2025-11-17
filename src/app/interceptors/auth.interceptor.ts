@@ -26,9 +26,6 @@ export class AuthInterceptor implements HttpInterceptor {
     const skipAuth = request.url.includes('/auth/login') || 
                      request.url.includes('/auth/register') || 
                      request.url.includes('/auth/refresh') ||
-                     request.url.includes('/auth/otp') ||
-                     request.url.includes('/auth/send-otp') ||
-                     request.url.includes('/auth/verify-otp') ||
                      request.url.includes('/auth/reset-password') ||
                      request.url.includes('/auth/forgot-password');
 

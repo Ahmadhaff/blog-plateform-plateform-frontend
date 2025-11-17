@@ -100,22 +100,9 @@ export class LoginComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         this.loading.set(false);
+        // Display error message from server or default message
         const errorMessage = error.error?.error || error.error?.message || 'Login failed. Please check your credentials.';
-        
-        // Check if email is not verified
-        if (errorMessage.toLowerCase().includes('email not verified') || 
-            (error.status === 403 && errorMessage.toLowerCase().includes('email'))) {
-          // Show error message briefly, then redirect to OTP verification page
-          this.error.set('Please verify your email address before logging in. Redirecting to verification page...');
-          setTimeout(() => {
-            this.router.navigate(['/verify-otp'], {
-              queryParams: { email: email }
-            });
-          }, 2000);
-        } else {
-          // Display other errors normally
-          this.error.set(errorMessage);
-        }
+        this.error.set(errorMessage);
       }
     });
   }

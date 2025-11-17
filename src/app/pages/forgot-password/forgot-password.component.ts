@@ -30,37 +30,8 @@ export class ForgotPasswordComponent {
   }
 
   onSubmit(): void {
-    if (this.emailForm.invalid) {
-      this.markFormGroupTouched();
-      return;
-    }
-
-    this.loading.set(true);
-    this.error.set(null);
-    this.success.set(null);
-
-    const email = this.emailForm.value.email;
-
-    // Send OTP immediately
-    this.authService.sendOtp(email, 'password_reset').subscribe({
-      next: (response) => {
-        this.loading.set(false);
-        // OTP sent successfully, redirect to verify OTP page
-        // The verify page will show the OTP input form directly
-        this.router.navigate(['/verify-otp'], {
-          queryParams: { 
-            email: email,
-            type: 'password_reset',
-            sent: 'true' // Flag to indicate OTP was already sent
-          }
-        });
-      },
-      error: (error) => {
-        this.loading.set(false);
-        const errorMessage = error.error?.error || error.error?.message || 'Failed to send verification code. Please try again.';
-        this.error.set(errorMessage);
-      }
-    });
+    // Password reset via OTP is currently disabled
+    this.error.set('Password reset is currently unavailable. Please contact support for assistance.');
   }
 
   private markFormGroupTouched(): void {

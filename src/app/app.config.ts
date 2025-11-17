@@ -24,9 +24,6 @@ const authInterceptorFn: HttpInterceptorFn = (req, next) => {
     const skipAuth = req.url.includes('/auth/login') || 
                    req.url.includes('/auth/register') || 
                    req.url.includes('/auth/refresh') ||
-                   req.url.includes('/auth/otp') ||
-                   req.url.includes('/auth/send-otp') ||
-                   req.url.includes('/auth/verify-otp') ||
                    req.url.includes('/auth/reset-password') ||
                    req.url.includes('/auth/forgot-password') ||
                    // Public API endpoints that don't require authentication
