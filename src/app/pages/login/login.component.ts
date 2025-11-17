@@ -71,31 +71,16 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this.authService.login(email, password).subscribe({
       next: (response) => {
-        // After successful login, fetch full user profile to get avatar URL
-        this.authService.getUserProfile().subscribe({
-          next: () => {
-            this.loading.set(false);
-            // Clear pending credentials after successful login
-            sessionStorage.removeItem('pendingLoginEmail');
-            sessionStorage.removeItem('pendingLoginPassword');
-            
-            // Don't show success message - redirect immediately
-            // The home page will show the authenticated state
-            this.router.navigate(['/']).then(() => {
-              // Force a page reload to update auth state across all components
-              window.location.reload();
-            });
-          },
-          error: (profileError) => {
-            // Even if profile fetch fails, proceed with login
-            console.error('Failed to fetch user profile:', profileError);
-            this.loading.set(false);
-            sessionStorage.removeItem('pendingLoginEmail');
-            sessionStorage.removeItem('pendingLoginPassword');
-            this.router.navigate(['/']).then(() => {
-              window.location.reload();
-            });
-          }
+        this.loading.set(false);
+        // Clear pending credentials after successful login
+        sessionStorage.removeItem('pendingLoginEmail');
+        sessionStorage.removeItem('pendingLoginPassword');
+        
+        // Redirect immediately - don't wait for profile fetch
+        // The profile can be fetched on the home page if needed
+        this.router.navigate(['/']).then(() => {
+          // Force a page reload to update auth state across all components
+          window.location.reload();
         });
       },
       error: (error) => {
@@ -103,6 +88,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         // Display error message from server or default message
         const errorMessage = error.error?.error || error.error?.message || 'Login failed. Please check your credentials.';
         this.error.set(errorMessage);
+        console.error('❌ Login error:', error);
       }
     });
   }
