@@ -83,11 +83,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
 
-      // Connect to socket for real-time updates
-      const token = this.authService.getToken();
-      if (token) {
-        this.socketService.connect(token);
-      }
+      // Don't connect socket here - app.component.ts manages socket connections globally
+      // Socket connection is handled by app.component.ts to prevent duplicates
     }
 
     // Listen for article liked events for real-time updates

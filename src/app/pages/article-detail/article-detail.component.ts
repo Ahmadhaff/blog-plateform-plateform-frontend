@@ -82,7 +82,8 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
           // Load article and comments
           this.loadArticle();
           this.loadComments();
-          this.connectSocket();
+          // Don't connect socket here - app.component.ts manages socket connections globally
+          // Socket connection is handled by app.component.ts to prevent duplicates
           this.setupSocketListeners();
           
           // Check for commentId in query params or fragment after comments load
@@ -216,16 +217,13 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
           this.currentUserId.set(null);
         }
       }
-      const token = this.authService.getToken();
-      if (token) {
-        // Connect to socket
-        this.socketService.connect(token);
-        
-        // Wait for socket connection before joining rooms
-        // Use a small delay to ensure socket is ready, then join article room
-        setTimeout(() => {
-          if (this.socketService.isConnected() && this.articleIdValue) {
-            this.socketService.joinArticle(this.articleIdValue);
+      
+      // Don't connect socket here - app.component.ts manages socket connections globally
+      // Just wait for socket to be ready, then join article room
+      // Use a small delay to ensure socket is ready, then join article room
+      setTimeout(() => {
+        if (this.socketService.isConnected() && this.articleIdValue) {
+          this.socketService.joinArticle(this.articleIdValue);
             this.socketService.joinUserRoom();
             
             // After joining the room, emit view increment if article is loaded

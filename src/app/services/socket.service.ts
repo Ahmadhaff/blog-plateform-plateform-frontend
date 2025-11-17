@@ -40,14 +40,34 @@ export class SocketService {
   private commentDeletedSubject = new Subject<CommentDeletedEvent>();
   private articleLikedSubject = new Subject<ArticleLikedEvent>();
 
+  private isConnecting = false;
+
   /**
    * Connect to WebSocket server
    * @param token JWT token for authentication
    */
   connect(token: string): void {
+    // Prevent duplicate connections
     if (this.socket?.connected) {
+      console.log('✅ [SocketService] Already connected, skipping');
       return;
     }
+
+    // Prevent multiple simultaneous connection attempts
+    if (this.isConnecting) {
+      console.log('⚠️ [SocketService] Connection already in progress, skipping');
+      return;
+    }
+
+    // If socket exists but not connected, disconnect it first
+    if (this.socket && !this.socket.connected) {
+      console.log('⚠️ [SocketService] Disconnecting existing socket before reconnecting');
+      this.socket.disconnect();
+      this.socket = null;
+    }
+
+    this.isConnecting = true;
+    console.log('🔌 [SocketService] Connecting to:', this.socketUrl);
 
     this.socket = io(this.socketUrl, {
       auth: { token },
@@ -56,7 +76,8 @@ export class SocketService {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5
+      reconnectionAttempts: 5,
+      forceNew: true // Force a new connection to prevent duplicates
     });
 
     this.setupEventListeners();
@@ -66,7 +87,9 @@ export class SocketService {
    * Disconnect from WebSocket server
    */
   disconnect(): void {
+    this.isConnecting = false;
     if (this.socket) {
+      console.log('🔌 [SocketService] Disconnecting');
       this.socket.disconnect();
       this.socket = null;
     }
@@ -218,6 +241,8 @@ export class SocketService {
     }
 
       this.socket.on('connect', () => {
+        this.isConnecting = false;
+        console.log('✅ [SocketService] Connected successfully');
         this.joinUserRoom();
         
         // Request count after connection
@@ -233,11 +258,13 @@ export class SocketService {
         }, 100);
       });
 
-    this.socket.on('disconnect', () => {
-      // Optionally handle disconnect event if needed
+    this.socket.on('disconnect', (reason) => {
+      this.isConnecting = false;
+      console.log('⚠️ [SocketService] Disconnected:', reason);
     });
 
     this.socket.on('connect_error', (error) => {
+      this.isConnecting = false;
       console.error('❌ [SocketService] Socket connection error:', error);
     });
 
