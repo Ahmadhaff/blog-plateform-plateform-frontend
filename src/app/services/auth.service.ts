@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
@@ -58,32 +58,23 @@ export class AuthService {
     return this.http.post<ResetPasswordResponse>(`${this.baseUrl}/reset-password`, body, { headers });
   }
 
-  logout(): void {
+  logout(): Observable<any> {
     const token = this.getToken();
     
-    // Clear localStorage immediately for better UX
-    this.clearLocalStorage();
+    // If we have a token, make logout request BEFORE clearing localStorage
+    // This ensures the token is available for the API call
+    if (token) {
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`
+      });
 
-    // If no token, nothing else to do
-    if (!token) {
-      return;
+      // Make logout request to backend
+      // Note: Don't clear localStorage here - let app.component handle it after navigation
+      return this.http.post<any>(`${this.baseUrl}/logout`, {}, { headers });
+    } else {
+      // No token, return completed observable (app.component will handle cleanup)
+      return of({});
     }
-
-    // Call backend logout endpoint to invalidate refresh token (fire and forget)
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
-    // Make logout request to backend (async, don't wait)
-    this.http.post<any>(`${this.baseUrl}/logout`, {}, { headers }).subscribe({
-      next: () => {
-        // Logout on server succeeded
-      },
-      error: (error) => {
-        // Even if logout fails, we already cleared localStorage
-        console.error('Error logging out from server:', error);
-      }
-    });
   }
 
   clearLocalStorage(): void {

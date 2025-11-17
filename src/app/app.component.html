@@ -122,8 +122,18 @@
               class="avatar-image" />
           }
         </button>
-        <button type="button" class="logout-button" (click)="logout()" aria-label="Logout">
-          Logout
+        <button 
+          type="button" 
+          class="logout-button" 
+          [disabled]="logoutLoading()"
+          (click)="logout()" 
+          aria-label="Logout">
+          @if (logoutLoading()) {
+            <span class="logout-button__loader"></span>
+            <span>Logging out...</span>
+          } @else {
+            <span>Logout</span>
+          }
         </button>
       } @else {
         <a routerLink="/login" class="login-button">Sign In</a>

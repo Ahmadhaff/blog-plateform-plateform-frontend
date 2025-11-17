@@ -26,6 +26,7 @@ const authInterceptorFn: HttpInterceptorFn = (req, next) => {
                    req.url.includes('/auth/refresh') ||
                    req.url.includes('/auth/reset-password') ||
                    req.url.includes('/auth/forgot-password') ||
+                   req.url.includes('/auth/logout') || // Allow logout without token (might be called after clearing)
                    // Public API endpoints that don't require authentication
                    // Exclude /articles/my/* from public endpoints (requires auth)
                    (req.method === 'GET' && req.url.includes('/api/articles') && !req.url.includes('/articles/my')) ||

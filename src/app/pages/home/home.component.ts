@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -32,6 +32,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly socketService = inject(SocketService);
   private readonly destroy$ = new Subject<void>();
   private readonly elementRef = inject(ElementRef);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   @ViewChild('loadMoreTrigger', { static: false }) loadMoreTrigger?: ElementRef<HTMLElement>;
 
@@ -69,23 +70,11 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }));
     
     // Check authentication and get user ID
-    const isAuth = this.authService.isAuthenticated();
-    this.isAuthenticated.set(isAuth);
+    this.updateAuthState();
     
-    if (isAuth) {
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        try {
-          const user = JSON.parse(userStr);
-          this.currentUserId.set(user?._id || null);
-        } catch (e) {
-          console.error('Error parsing user from localStorage:', e);
-        }
-      }
-
-      // Don't connect socket here - app.component.ts manages socket connections globally
-      // Socket connection is handled by app.component.ts to prevent duplicates
-    }
+    // Listen for auth state changes (login/logout from same or other tabs)
+    window.addEventListener('storage', this.handleStorageChange.bind(this));
+    window.addEventListener('authStateChanged', this.handleAuthStateChange.bind(this));
 
     // Listen for article liked events for real-time updates
     this.socketService.onArticleLiked()
@@ -177,6 +166,48 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.destroy$.next();
     this.destroy$.complete();
+    // Remove event listeners
+    window.removeEventListener('storage', this.handleStorageChange.bind(this));
+    window.removeEventListener('authStateChanged', this.handleAuthStateChange.bind(this));
+  }
+  
+  private updateAuthState(): void {
+    // Check authentication and get user ID
+    const isAuth = this.authService.isAuthenticated();
+    this.isAuthenticated.set(isAuth);
+    
+    if (isAuth) {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          this.currentUserId.set(user?._id || null);
+        } catch (e) {
+          console.error('Error parsing user from localStorage:', e);
+          this.currentUserId.set(null);
+        }
+      } else {
+        this.currentUserId.set(null);
+      }
+    } else {
+      this.currentUserId.set(null);
+    }
+  }
+  
+  private handleStorageChange(event: StorageEvent): void {
+    // Update auth state when localStorage changes (login/logout from another tab)
+    if (event.key === 'token' || event.key === 'user') {
+      this.updateAuthState();
+      // Trigger change detection to ensure UI updates
+      this.cdr.markForCheck();
+    }
+  }
+  
+  private handleAuthStateChange(): void {
+    // Update auth state when custom event is dispatched (login/logout from same tab)
+    this.updateAuthState();
+    // Trigger change detection to ensure UI updates
+    this.cdr.markForCheck();
   }
 
   /**

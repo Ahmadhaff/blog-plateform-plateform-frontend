@@ -41,6 +41,7 @@ export class SocketService {
   private articleLikedSubject = new Subject<ArticleLikedEvent>();
 
   private isConnecting = false;
+  private listenersSetup = false;
 
   /**
    * Connect to WebSocket server
@@ -59,11 +60,14 @@ export class SocketService {
       return;
     }
 
-    // If socket exists but not connected, disconnect it first
+    // If socket exists but not connected, clean it up first
     if (this.socket && !this.socket.connected) {
-      console.log('⚠️ [SocketService] Disconnecting existing socket before reconnecting');
-      this.socket.disconnect();
+      console.log('⚠️ [SocketService] Cleaning up existing socket before reconnecting');
+      // Don't call disconnect() here as it might trigger events
+      // Just remove listeners and set to null
+      this.socket.removeAllListeners();
       this.socket = null;
+      this.listenersSetup = false;
     }
 
     this.isConnecting = true;
@@ -88,8 +92,10 @@ export class SocketService {
    */
   disconnect(): void {
     this.isConnecting = false;
+    this.listenersSetup = false;
     if (this.socket) {
       console.log('🔌 [SocketService] Disconnecting');
+      this.socket.removeAllListeners();
       this.socket.disconnect();
       this.socket = null;
     }
@@ -240,27 +246,44 @@ export class SocketService {
       return;
     }
 
-      this.socket.on('connect', () => {
-        this.isConnecting = false;
-        console.log('✅ [SocketService] Connected successfully');
-        this.joinUserRoom();
-        
-        // Request count after connection
-        setTimeout(() => {
-          if (this.socket?.connected) {
-            this.requestNotificationCount();
-          }
-        }, 300);
-        
-        // Emit socket ready event
-        setTimeout(() => {
-          this.socket?.emit('socketReady');
-        }, 100);
-      });
+    // Only setup listeners once per socket instance
+    if (this.listenersSetup) {
+      console.log('⚠️ [SocketService] Listeners already setup, skipping');
+      return;
+    }
+
+    this.listenersSetup = true;
+
+    this.socket.on('connect', () => {
+      this.isConnecting = false;
+      console.log('✅ [SocketService] Connected successfully');
+      this.joinUserRoom();
+      
+      // Request count after connection
+      setTimeout(() => {
+        if (this.socket?.connected) {
+          this.requestNotificationCount();
+        }
+      }, 300);
+      
+      // Emit socket ready event
+      setTimeout(() => {
+        if (this.socket?.connected) {
+          this.socket.emit('socketReady');
+        }
+      }, 100);
+    });
 
     this.socket.on('disconnect', (reason) => {
       this.isConnecting = false;
       console.log('⚠️ [SocketService] Disconnected:', reason);
+      
+      // Only reset socket to null if it was a manual disconnect or server disconnect
+      // Don't reset on client-side disconnect (might reconnect)
+      if (reason === 'io client disconnect' || reason === 'io server disconnect') {
+        // Keep socket instance for reconnection attempts
+        // Only set to null on explicit disconnect() call
+      }
     });
 
     this.socket.on('connect_error', (error) => {

@@ -58,6 +58,12 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Check authentication state immediately (before route params subscription)
+    this.updateAuthState();
+    
+    // Listen for storage changes (login/logout from another tab)
+    window.addEventListener('storage', this.handleStorageChange.bind(this));
+    
     // Subscribe to route params to handle navigation changes
     this.route.paramMap
       .pipe(
@@ -69,22 +75,37 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
             return;
           }
           
-          // Disconnect previous socket connection if any
-          if (this.socketService.isConnected() && this.articleIdValue) {
+          // Leave previous article room if any (don't disconnect socket - managed globally)
+          if (this.socketService.isConnected() && this.articleIdValue && this.articleIdValue !== articleId) {
             this.socketService.leaveArticle(this.articleIdValue);
-            this.socketService.disconnect();
           }
           
           this.articleIdValue = articleId;
           this.loading.set(true);
           this.error.set(null);
           
+          // Update auth state on route change (user might have logged in/out)
+          this.updateAuthState();
+          
           // Load article and comments
           this.loadArticle();
           this.loadComments();
-          // Don't connect socket here - app.component.ts manages socket connections globally
-          // Socket connection is handled by app.component.ts to prevent duplicates
+          
+          // Setup socket listeners (socket connection is handled by app.component.ts)
           this.setupSocketListeners();
+          
+          // Wait for socket to be ready, then join article room
+          setTimeout(() => {
+            if (this.socketService.isConnected() && this.articleIdValue) {
+              this.socketService.joinArticle(this.articleIdValue);
+              this.socketService.joinUserRoom();
+              
+              // After joining the room, emit view increment if article is loaded
+              setTimeout(() => {
+                this.emitViewIncrementIfReady();
+              }, 300);
+            }
+          }, 500);
           
           // Check for commentId in query params or fragment after comments load
           this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(queryParams => {
@@ -103,6 +124,30 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
       )
       .subscribe();
   }
+  
+  private updateAuthState(): void {
+    // Check authentication state using AuthService
+    const isAuth = this.authService.isAuthenticated();
+    this.isAuthenticated.set(isAuth);
+    
+    // Get current user ID if authenticated
+    if (isAuth) {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          this.currentUserId.set(user?._id || null);
+        } catch (e) {
+          console.error('Error parsing user from localStorage:', e);
+          this.currentUserId.set(null);
+        }
+      } else {
+        this.currentUserId.set(null);
+      }
+    } else {
+      this.currentUserId.set(null);
+    }
+  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -110,8 +155,19 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
     if (this.typingTimeout) {
       clearTimeout(this.typingTimeout);
     }
-    this.socketService.leaveArticle(this.articleIdValue);
-    this.socketService.disconnect();
+    // Remove storage event listener
+    window.removeEventListener('storage', this.handleStorageChange.bind(this));
+    // Only leave the article room, don't disconnect socket (managed globally by app.component)
+    if (this.articleIdValue) {
+      this.socketService.leaveArticle(this.articleIdValue);
+    }
+  }
+  
+  private handleStorageChange(event: StorageEvent): void {
+    // Update auth state when localStorage changes (login/logout from another tab)
+    if (event.key === 'token' || event.key === 'user') {
+      this.updateAuthState();
+    }
   }
 
   private loadArticle(): void {
