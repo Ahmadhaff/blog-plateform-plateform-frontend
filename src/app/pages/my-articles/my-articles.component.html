@@ -74,15 +74,23 @@
 
           <div class="form-group">
             <label for="create-image">Image <span class="required">*</span></label>
-            <input
-              id="create-image"
-              type="file"
-              accept="image/*"
-              (change)="onCreateImageSelected($event)"
-              class="form-file" />
-            @if (createForm.get('image')?.invalid && createForm.get('image')?.touched) {
-              <span class="error-text">Image is required</span>
-            }
+            <div class="image-upload-wrapper">
+              <input
+                id="create-image"
+                type="file"
+                accept="image/*"
+                (change)="onCreateImageSelected($event)"
+                class="image-upload-input"
+                #createImageInput />
+              <label for="create-image" class="image-upload-label">
+                <span class="material-symbols-rounded">image</span>
+                <span class="upload-text">Click to upload image</span>
+                <span class="upload-hint">or drag and drop</span>
+              </label>
+              @if (createForm.get('image')?.invalid && createForm.get('image')?.touched) {
+                <span class="error-text">Image is required</span>
+              }
+            </div>
           </div>
         </div>
 
@@ -170,12 +178,20 @@
 
                 <div class="form-group">
                   <label for="image">Image (optional)</label>
-                  <input
-                    id="image"
-                    type="file"
-                    accept="image/*"
-                    (change)="onImageSelected($event)"
-                    class="form-file" />
+                  <div class="image-upload-wrapper">
+                    <input
+                      id="image"
+                      type="file"
+                      accept="image/*"
+                      (change)="onImageSelected($event)"
+                      class="image-upload-input"
+                      #editImageInput />
+                    <label for="image" class="image-upload-label">
+                      <span class="material-symbols-rounded">image</span>
+                      <span class="upload-text">Click to upload image</span>
+                      <span class="upload-hint">or drag and drop</span>
+                    </label>
+                  </div>
                 </div>
               </div>
 

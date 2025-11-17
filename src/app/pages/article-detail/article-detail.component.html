@@ -56,7 +56,9 @@
         </div>
       }
 
-      <div class="article__content" [innerHTML]="article()!.content"></div>
+      <div class="article__content">
+        <div class="article__full-content" [innerHTML]="article()!.content"></div>
+      </div>
 
       @if (article()!.tags && article()!.tags.length > 0) {
         <div class="article__tags">
