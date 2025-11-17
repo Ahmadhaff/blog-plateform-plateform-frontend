@@ -224,16 +224,15 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
       setTimeout(() => {
         if (this.socketService.isConnected() && this.articleIdValue) {
           this.socketService.joinArticle(this.articleIdValue);
-            this.socketService.joinUserRoom();
-            
-            // After joining the room, emit view increment if article is loaded
-            // Use emitViewIncrementIfReady to ensure proper timing
-            setTimeout(() => {
-              this.emitViewIncrementIfReady();
-            }, 300);
-          }
-        }, 300);
-      }
+          this.socketService.joinUserRoom();
+          
+          // After joining the room, emit view increment if article is loaded
+          // Use emitViewIncrementIfReady to ensure proper timing
+          setTimeout(() => {
+            this.emitViewIncrementIfReady();
+          }, 300);
+        }
+      }, 300);
     }
   }
 
