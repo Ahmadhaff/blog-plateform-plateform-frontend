@@ -290,8 +290,11 @@ export class AppComponent implements OnInit, OnDestroy {
         this.loadNotifications();
         this.connectSocket();
       } else if (this.socketService.isConnected()) {
-        // Already connected, just setup listeners and load notifications
-        this.setupNotificationListeners();
+        // Already connected, just ensure listeners are setup and load notifications
+        // Only setup listeners if they're not already set up
+        if (!this.notificationSubscriptions) {
+          this.setupNotificationListeners();
+        }
         this.socketService.requestNotificationCount();
         this.loadNotifications();
       }
@@ -315,18 +318,71 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private connectSocket(): void {
-    const token = this.authService.getToken();
+    let token = this.authService.getToken();
     
-    if (token) {
-      this.setupNotificationListeners();
-      this.socketService.connect(token);
-      
-      setTimeout(() => {
-        if (this.socketService.isConnected()) {
-          this.socketService.requestNotificationCount();
-        }
-      }, 500);
+    if (!token) {
+      console.warn('⚠️ [AppComponent] No token available for socket connection');
+      return;
     }
+    
+    // Check if token is expired, refresh it before connecting
+    if (this.authService.isTokenExpired(token)) {
+      console.log('⚠️ [AppComponent] Access token expired, refreshing before socket connection');
+      const refreshToken = this.authService.getRefreshToken();
+      
+      if (refreshToken && !this.authService.isTokenExpired(refreshToken)) {
+        // Refresh the token before connecting
+        this.authService.refreshToken().subscribe({
+          next: (response) => {
+            if (response.accessToken) {
+              console.log('✅ [AppComponent] Token refreshed, connecting socket');
+              token = response.accessToken;
+              // Don't setup listeners here - will be done after connection is confirmed
+              this.socketService.connect(token);
+              
+              // Setup listeners and request count after connection is established
+              setTimeout(() => {
+                if (this.socketService.isConnected()) {
+                  // Only setup listeners once when socket is actually connected
+                  if (!this.notificationSubscriptions) {
+                    this.setupNotificationListeners();
+                  }
+                  this.socketService.requestNotificationCount();
+                }
+              }, 500);
+            }
+          },
+          error: (error) => {
+            console.error('❌ [AppComponent] Failed to refresh token for socket connection:', error);
+            // Still try to connect with expired token - server will reject it
+            // But this gives better error visibility
+            if (token) {
+              // Don't setup listeners here - will be done after connection is confirmed (if it succeeds)
+              this.socketService.connect(token);
+            }
+          }
+        });
+        return;
+      } else {
+        console.error('❌ [AppComponent] Refresh token expired, cannot connect socket');
+        return;
+      }
+    }
+    
+    // Token is valid, connect directly
+    // Don't setup listeners here - will be done after connection is confirmed
+    this.socketService.connect(token);
+    
+    // Setup listeners and request count after connection is established
+    setTimeout(() => {
+      if (this.socketService.isConnected()) {
+        // Only setup listeners once when socket is actually connected
+        if (!this.notificationSubscriptions) {
+          this.setupNotificationListeners();
+        }
+        this.socketService.requestNotificationCount();
+      }
+    }, 500);
   }
 
   private setupNotificationListeners(): void {

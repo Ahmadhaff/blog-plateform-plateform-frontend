@@ -66,22 +66,32 @@ export class SocketService {
       // Don't call disconnect() here as it might trigger events
       // Just remove listeners and set to null
       this.socket.removeAllListeners();
+      this.socket.close(); // Close the socket properly
       this.socket = null;
       this.listenersSetup = false;
     }
 
     this.isConnecting = true;
     console.log('🔌 [SocketService] Connecting to:', this.socketUrl);
+    console.log('🔑 [SocketService] Token present:', !!token);
 
+    // For Render.com, prefer polling first, then upgrade to websocket
+    // This works better with proxies and load balancers
     this.socket = io(this.socketUrl, {
       auth: { token },
-      transports: ['websocket', 'polling'],
-      timeout: 20000, // 20 seconds timeout
+      transports: ['polling', 'websocket'], // Polling first for better compatibility
+      upgrade: true, // Allow upgrade to websocket
+      rememberUpgrade: false, // Don't remember upgrade preference
+      timeout: 30000, // 30 seconds timeout (longer for production)
       reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
+      reconnectionDelay: 2000,
+      reconnectionDelayMax: 10000,
       reconnectionAttempts: 5,
-      forceNew: true // Force a new connection to prevent duplicates
+      forceNew: true, // Force a new connection to prevent duplicates
+      autoConnect: true,
+      // Additional options for Render.com compatibility
+      path: '/socket.io/',
+      withCredentials: true
     });
 
     this.setupEventListeners();
@@ -278,6 +288,12 @@ export class SocketService {
       this.isConnecting = false;
       console.log('⚠️ [SocketService] Disconnected:', reason);
       
+      // If disconnected due to transport error or server error, reset connection state
+      if (reason === 'transport close' || reason === 'transport error' || reason === 'ping timeout') {
+        console.log('⚠️ [SocketService] Transport error, will allow reconnection');
+        // Don't reset isConnecting here - let reconnection handle it
+      }
+      
       // Only reset socket to null if it was a manual disconnect or server disconnect
       // Don't reset on client-side disconnect (might reconnect)
       if (reason === 'io client disconnect' || reason === 'io server disconnect') {
@@ -289,6 +305,22 @@ export class SocketService {
     this.socket.on('connect_error', (error) => {
       this.isConnecting = false;
       console.error('❌ [SocketService] Socket connection error:', error);
+      console.error('❌ [SocketService] Error type:', error.constructor.name);
+      console.error('❌ [SocketService] Error message:', error.message);
+      
+      // Reset connection state on error to allow retry
+      // Socket.IO will handle reconnection automatically
+      setTimeout(() => {
+        if (!this.socket?.connected && !this.isConnecting) {
+          console.log('⚠️ [SocketService] Connection failed, will retry via auto-reconnect');
+        }
+      }, 2000);
+    });
+    
+    // Handle timeout specifically
+    this.socket.on('error', (error) => {
+      this.isConnecting = false;
+      console.error('❌ [SocketService] Socket error:', error);
     });
 
     this.socket.on('newComment', (data: NewCommentEvent) => {
