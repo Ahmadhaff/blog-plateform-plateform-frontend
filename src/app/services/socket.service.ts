@@ -303,22 +303,19 @@ export class SocketService {
     });
 
     this.socket.on('connect_error', (error) => {
+      // Reset connection flag immediately to allow retry
       this.isConnecting = false;
       console.error('❌ [SocketService] Socket connection error:', error);
       console.error('❌ [SocketService] Error type:', error.constructor.name);
       console.error('❌ [SocketService] Error message:', error.message);
       
-      // Reset connection state on error to allow retry
-      // Socket.IO will handle reconnection automatically
-      setTimeout(() => {
-        if (!this.socket?.connected && !this.isConnecting) {
-          console.log('⚠️ [SocketService] Connection failed, will retry via auto-reconnect');
-        }
-      }, 2000);
+      // Socket.IO will handle reconnection automatically via auto-reconnect
+      // Reset flag so manual retry is also possible if needed
     });
     
     // Handle timeout specifically
     this.socket.on('error', (error) => {
+      // Reset connection flag on any error to allow retry
       this.isConnecting = false;
       console.error('❌ [SocketService] Socket error:', error);
     });
