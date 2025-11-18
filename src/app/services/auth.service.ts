@@ -24,13 +24,10 @@ export class AuthService {
     const body: LoginRequest = { email, password };
     return this.http.post<LoginResponse>(`${this.baseUrl}/login`, body).pipe(
       tap(response => {
-        // Store tokens in localStorage
         if (response.accessToken) {
           localStorage.setItem('token', response.accessToken);
           localStorage.setItem('refreshToken', response.refreshToken);
           localStorage.setItem('user', JSON.stringify(response.user));
-        } else {
-          console.error('❌ No accessToken in login response');
         }
       })
     );
@@ -40,7 +37,6 @@ export class AuthService {
     const body: RegisterRequest = { username, email, password, role };
     return this.http.post<RegisterResponse>(`${this.baseUrl}/register`, body).pipe(
       tap(response => {
-        // Store tokens in localStorage
         if (response.accessToken) {
           localStorage.setItem('token', response.accessToken);
           localStorage.setItem('refreshToken', response.refreshToken);
@@ -61,20 +57,14 @@ export class AuthService {
   logout(): Observable<any> {
     const token = this.getToken();
     
-    // If we have a token, make logout request BEFORE clearing localStorage
-    // This ensures the token is available for the API call
     if (token) {
       const headers = new HttpHeaders({
         'Authorization': `Bearer ${token}`
       });
-
-      // Make logout request to backend
-      // Note: Don't clear localStorage here - let app.component handle it after navigation
       return this.http.post<any>(`${this.baseUrl}/logout`, {}, { headers });
-    } else {
-      // No token, return completed observable (app.component will handle cleanup)
-      return of({});
     }
+    
+    return of({});
   }
 
   clearLocalStorage(): void {
@@ -109,7 +99,6 @@ export class AuthService {
     });
     return this.http.get<any>(`${environment.apiUrl}/users/me`, { headers }).pipe(
       tap(response => {
-        // Update user in localStorage with fresh profile data
         if (response.user) {
           localStorage.setItem('user', JSON.stringify(response.user));
         }
@@ -128,17 +117,14 @@ export class AuthService {
   refreshToken(): Observable<{ user: any; accessToken: string; refreshToken: string }> {
     const refreshToken = localStorage.getItem('refreshToken');
     if (!refreshToken) {
-      console.error('❌ No refresh token available for refresh');
       throw new Error('No refresh token available');
     }
     
-    // Backend expects 'token' field, not 'refreshToken'
     return this.http.post<{ user: any; accessToken: string; refreshToken: string }>(
       `${this.baseUrl}/refresh`,
       { token: refreshToken }
     ).pipe(
       tap(response => {
-        // Update tokens in localStorage
         if (response.accessToken && response.refreshToken) {
           localStorage.setItem('token', response.accessToken);
           localStorage.setItem('refreshToken', response.refreshToken);
@@ -146,8 +132,6 @@ export class AuthService {
             localStorage.setItem('user', JSON.stringify(response.user));
           }
         } else {
-          console.error('❌ No accessToken in refresh response');
-          // Clear session if refresh response is invalid
           this.clearLocalStorage();
           throw new Error('Invalid refresh response');
         }
