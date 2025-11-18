@@ -188,8 +188,8 @@ export class AppComponent implements OnInit, OnDestroy {
               }
             });
           }
-        } catch (error) {
-          console.error('❌ Error parsing access token:', error);
+        } catch {
+          // Invalid token format
         }
       }
 
