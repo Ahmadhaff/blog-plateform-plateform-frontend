@@ -36,22 +36,16 @@ export class AppComponent implements OnInit, OnDestroy {
   private notificationSubscriptions?: Subscription;
 
   constructor() {
-    // Update auth state when router navigates
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => {
         this.checkAuth();
-        // Close mobile menu on navigation
         this.closeMobileMenu();
       });
 
-    // Listen for storage changes (login/logout from same or other tabs)
     window.addEventListener('storage', this.handleStorageChange.bind(this));
-    
-    // Also listen for custom events (login/logout from same tab)
     window.addEventListener('authStateChanged', this.handleAuthStateChange.bind(this));
 
-    // Close dropdown when clicking outside
     document.addEventListener('click', (event) => {
       const target = event.target as HTMLElement;
       if (!target.closest('.notification-container')) {
@@ -59,7 +53,6 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Close dropdown on navigation
     this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(() => {
       if (this.showNotificationDropdown()) {
         this.closeNotificationDropdown();
@@ -68,14 +61,12 @@ export class AppComponent implements OnInit, OnDestroy {
   }
   
   private handleStorageChange(event: StorageEvent): void {
-    // Update auth state when localStorage changes (login/logout from another tab)
     if (event.key === 'token' || event.key === 'user') {
       this.checkAuth();
     }
   }
   
   private handleAuthStateChange(): void {
-    // Update auth state when custom event is dispatched (login/logout from same tab)
     this.checkAuth();
   }
 
@@ -105,30 +96,23 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
-    // Prevent multiple simultaneous logout attempts
     if (this.logoutLoading()) {
       return;
     }
 
-    // Show loader in logout button
     this.logoutLoading.set(true);
 
-    // Make logout request to backend first, then clean frontend and redirect
     this.authService.logout().subscribe({
       next: () => {
-        // Logout on server succeeded - now clean frontend and redirect
         this.completeLogout();
       },
-      error: (error) => {
-        // Even if logout fails, still clean frontend and redirect
-        console.error('Error logging out from server:', error);
+      error: () => {
         this.completeLogout();
       }
     });
   }
 
   private completeLogout(): void {
-    // Clear local state
     this.isAuthenticated.set(false);
     this.currentUser.set(null);
     this.notificationCount.set(0);
@@ -136,19 +120,11 @@ export class AppComponent implements OnInit, OnDestroy {
     this.refreshTokenExpiresAt = null;
     this.isRefreshing = false;
     
-    // Disconnect socket
     this.socketService.disconnect();
-    
-    // Clear frontend storage
     this.authService.clearLocalStorage();
-    
-    // Hide loader
     this.logoutLoading.set(false);
     
-    // Navigate to home page
     this.router.navigate(['/']).then(() => {
-      // Force a check after navigation to ensure state is clean
-      // This will also dispatch authStateChanged event if state changed
       this.checkAuth();
     });
   }
@@ -160,7 +136,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.tokenCheckInterval = new Subscription();
 
-    // Check every second for token expiration
     const interval = setInterval(() => {
       if (!this.authService.isAuthenticated()) {
         clearInterval(interval);
@@ -187,18 +162,14 @@ export class AppComponent implements OnInit, OnDestroy {
               },
               error: (error) => {
                 this.isRefreshing = false;
-                console.error('❌ Failed to refresh access token:', error);
                 
-                // If refresh fails with 401 or invalid token error, logout immediately
                 if (error.status === 401 || 
                     error.error?.error?.toLowerCase().includes('invalid') ||
                     error.error?.error?.toLowerCase().includes('expired')) {
-                  console.error('❌ Refresh token is invalid or expired - Logging out');
                   this.logout();
                   return;
                 }
                 
-                // Check if refresh token also expired by parsing it
                 const refreshToken = this.authService.getRefreshToken();
                 if (refreshToken) {
                   try {
@@ -206,17 +177,12 @@ export class AppComponent implements OnInit, OnDestroy {
                     const refreshExp = refreshPayload.exp;
 
                     if (refreshExp && now >= refreshExp) {
-                      console.error('❌ Refresh token expired - Logging out');
                       this.logout();
                     }
-                  } catch (e) {
-                    console.error('❌ Error parsing refresh token:', e);
-                    // If we can't parse the token, it's likely invalid - logout
+                  } catch {
                     this.logout();
                   }
                 } else {
-                  // No refresh token available - logout
-                  console.error('❌ No refresh token available - Logging out');
                   this.logout();
                 }
               }
@@ -227,7 +193,6 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       }
 
-      // Check refresh token expiration
       if (this.refreshTokenExpiresAt && now >= this.refreshTokenExpiresAt) {
         clearInterval(interval);
         this.tokenCheckInterval?.unsubscribe();
@@ -246,11 +211,9 @@ export class AppComponent implements OnInit, OnDestroy {
       try {
         const payload = JSON.parse(atob(accessToken.split('.')[1]));
         const accessExp = payload.exp;
-        if (accessExp) {
-          // store access token expiration if needed later
-        }
-      } catch (error) {
-        console.error('❌ Error parsing access token:', error);
+        // Access token expiration stored for future use
+      } catch {
+        // Invalid token format
       }
     }
 
@@ -261,8 +224,8 @@ export class AppComponent implements OnInit, OnDestroy {
         if (refreshExp) {
           this.refreshTokenExpiresAt = refreshExp;
         }
-      } catch (error) {
-        console.error('❌ Error parsing refresh token:', error);
+      } catch {
+        // Invalid refresh token format
       }
     } else {
       this.refreshTokenExpiresAt = null;
@@ -272,8 +235,6 @@ export class AppComponent implements OnInit, OnDestroy {
   private checkAuth(): void {
     const isAuth = this.authService.isAuthenticated();
     const wasAuth = this.isAuthenticated();
-    
-    // Only dispatch event if auth state actually changed
     const authStateChanged = wasAuth !== isAuth;
     
     this.isAuthenticated.set(isAuth);
@@ -284,14 +245,10 @@ export class AppComponent implements OnInit, OnDestroy {
         this.logTokenExpirationTimes();
       }
       
-      // Only connect socket if not already connected and we weren't authenticated before
-      // This prevents disconnecting and reconnecting on every route change
       if (!this.socketService.isConnected() && !wasAuth) {
         this.loadNotifications();
         this.connectSocket();
       } else if (this.socketService.isConnected()) {
-        // Already connected, just ensure listeners are setup and load notifications
-        // Only setup listeners if they're not already set up
         if (!this.notificationSubscriptions) {
           this.setupNotificationListeners();
         }
@@ -299,8 +256,6 @@ export class AppComponent implements OnInit, OnDestroy {
         this.loadNotifications();
       }
     } else {
-      // Only disconnect socket if we were authenticated before
-      // This prevents disconnecting unnecessarily
       if (wasAuth) {
         this.currentUser.set(null);
         this.refreshTokenExpiresAt = null;
@@ -311,7 +266,6 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     }
     
-    // Dispatch event if auth state changed (for other components to react)
     if (authStateChanged) {
       window.dispatchEvent(new CustomEvent('authStateChanged'));
     }
@@ -321,62 +275,40 @@ export class AppComponent implements OnInit, OnDestroy {
     let token = this.authService.getToken();
     
     if (!token) {
-      console.warn('⚠️ [AppComponent] No token available for socket connection');
       return;
     }
     
-    // Check if token is expired, refresh it before connecting
     if (this.authService.isTokenExpired(token)) {
-      console.log('⚠️ [AppComponent] Access token expired, refreshing before socket connection');
       const refreshToken = this.authService.getRefreshToken();
       
       if (refreshToken && !this.authService.isTokenExpired(refreshToken)) {
-        // Refresh the token before connecting
         this.authService.refreshToken().subscribe({
           next: (response) => {
             if (response.accessToken) {
-              console.log('✅ [AppComponent] Token refreshed, connecting socket');
               token = response.accessToken;
-              // Don't setup listeners here - will be done after connection is confirmed
               this.socketService.connect(token);
-              
-              // Setup listeners and request count after connection is established
-              setTimeout(() => {
-                if (this.socketService.isConnected()) {
-                  // Only setup listeners once when socket is actually connected
-                  if (!this.notificationSubscriptions) {
-                    this.setupNotificationListeners();
-                  }
-                  this.socketService.requestNotificationCount();
-                }
-              }, 500);
+              this.setupSocketListeners();
             }
           },
-          error: (error) => {
-            console.error('❌ [AppComponent] Failed to refresh token for socket connection:', error);
-            // Still try to connect with expired token - server will reject it
-            // But this gives better error visibility
+          error: () => {
             if (token) {
-              // Don't setup listeners here - will be done after connection is confirmed (if it succeeds)
               this.socketService.connect(token);
             }
           }
         });
         return;
-      } else {
-        console.error('❌ [AppComponent] Refresh token expired, cannot connect socket');
-        return;
       }
+      
+      return;
     }
     
-    // Token is valid, connect directly
-    // Don't setup listeners here - will be done after connection is confirmed
     this.socketService.connect(token);
-    
-    // Setup listeners and request count after connection is established
+    this.setupSocketListeners();
+  }
+
+  private setupSocketListeners(): void {
     setTimeout(() => {
       if (this.socketService.isConnected()) {
-        // Only setup listeners once when socket is actually connected
         if (!this.notificationSubscriptions) {
           this.setupNotificationListeners();
         }
@@ -421,7 +353,7 @@ export class AppComponent implements OnInit, OnDestroy {
     });
 
     const readSub = this.socketService.onNotificationRead().subscribe(() => {
-      // Count will be updated via notificationCount event
+      // Count updated via notificationCount event
     });
 
     this.notificationSubscriptions = new Subscription();
@@ -449,8 +381,7 @@ export class AppComponent implements OnInit, OnDestroy {
           this.avatarError.set(false);
         }
       },
-      error: (error) => {
-        console.error('Failed to fetch user profile:', error);
+      error: () => {
         this.currentUser.set(this.authService.getCurrentUser());
       }
     });
@@ -495,7 +426,6 @@ export class AppComponent implements OnInit, OnDestroy {
       const articleId = notification.articleId || notification.data?.articleId;
       const commentId = notification.data?.commentId;
       
-      // Navigate to article with commentId as query parameter if it's a comment-related notification
       if (commentId && (
         notification.type === 'new_comment' || 
         notification.type === 'comment_reply' || 
@@ -524,8 +454,8 @@ export class AppComponent implements OnInit, OnDestroy {
           )
         );
       },
-      error: (error) => {
-        console.error('Error marking notification as read:', error);
+      error: () => {
+        // Error handled silently
       }
     });
   }
@@ -546,8 +476,8 @@ export class AppComponent implements OnInit, OnDestroy {
         );
         this.notificationCount.set(0);
       },
-      error: (error) => {
-        console.error('Error marking all notifications as read:', error);
+      error: () => {
+        // Error handled silently
       }
     });
   }
