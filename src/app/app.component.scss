@@ -296,34 +296,36 @@
           max-height: 75vh;
         }
 
+        // Mobile positioning - must be applied immediately to prevent jump
         @media (max-width: 768px) {
-          position: fixed;
-          top: 80px;
-          left: 50%;
-          right: auto;
-          bottom: auto;
-          transform: translateX(-50%);
-          width: min(380px, calc(100vw - 2rem));
-          max-width: calc(100vw - 2rem);
-          max-height: calc(100vh - 100px);
+          position: fixed !important;
+          top: 80px !important;
+          left: 50% !important;
+          right: auto !important;
+          bottom: auto !important;
+          transform: translate(-50%, 0) !important;
+          width: min(380px, calc(100vw - 2rem)) !important;
+          max-width: calc(100vw - 2rem) !important;
+          max-height: calc(100vh - 100px) !important;
           min-height: 300px;
           border-radius: 12px;
-          margin: 0;
+          margin: 0 !important;
+          animation: slideDownCentered 0.2s ease-out;
         }
 
         @media (max-width: 640px) {
-          top: 70px;
-          width: calc(100vw - 2rem);
-          max-width: calc(100vw - 2rem);
-          max-height: calc(100vh - 90px);
+          top: 70px !important;
+          width: calc(100vw - 2rem) !important;
+          max-width: calc(100vw - 2rem) !important;
+          max-height: calc(100vh - 90px) !important;
           min-height: 250px;
         }
 
         @media (max-width: 480px) {
-          top: 60px;
-          width: calc(100vw - 1.5rem);
-          max-width: calc(100vw - 1.5rem);
-          max-height: calc(100vh - 80px);
+          top: 60px !important;
+          width: calc(100vw - 1.5rem) !important;
+          max-width: calc(100vw - 1.5rem) !important;
+          max-height: calc(100vh - 80px) !important;
           min-height: 220px;
           border-radius: 10px;
         }
@@ -846,6 +848,17 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes slideDownCentered {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
   }
 }
 
