@@ -295,29 +295,27 @@
         }
 
         @media (max-width: 768px) {
-          position: fixed;
-          top: auto;
-          bottom: 1rem;
-          right: 1rem;
-          left: 1rem;
-          width: auto;
-          max-width: none;
+          right: 0;
+          left: auto;
+          width: min(380px, calc(100vw - 1rem));
+          max-width: calc(100vw - 1rem);
           max-height: calc(100vh - 120px);
           border-radius: 12px;
-          transform: none;
         }
 
         @media (max-width: 640px) {
-          bottom: 1rem;
-          right: 0.5rem;
-          left: 0.5rem;
+          right: 0;
+          left: auto;
+          width: calc(100vw - 1rem);
+          max-width: calc(100vw - 1rem);
           max-height: calc(100vh - 100px);
         }
 
         @media (max-width: 480px) {
-          bottom: 0.75rem;
-          right: 0.5rem;
-          left: 0.5rem;
+          right: 0;
+          left: auto;
+          width: calc(100vw - 0.75rem);
+          max-width: calc(100vw - 0.75rem);
           max-height: calc(100vh - 90px);
           border-radius: 10px;
         }
