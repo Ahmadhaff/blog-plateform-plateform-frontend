@@ -274,14 +274,12 @@
       }
 
       .notification-dropdown {
-        position: fixed;
-        top: auto;
-        bottom: auto;
+        position: absolute;
+        top: calc(100% + 0.75rem);
         right: 0;
-        left: auto;
         width: 380px;
-        max-width: calc(100vw - 1rem);
-        max-height: calc(100vh - 120px);
+        max-width: calc(100vw - 2rem);
+        max-height: 70vh;
         background: #fff;
         border-radius: 16px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
@@ -290,10 +288,11 @@
         display: flex;
         flex-direction: column;
         animation: slideDown 0.2s ease-out;
-        margin-top: 0.75rem;
 
         @media (max-width: 640px) {
           position: fixed;
+          top: auto;
+          bottom: 1rem;
           right: 0.5rem;
           left: 0.5rem;
           width: auto;
@@ -301,10 +300,10 @@
           max-height: calc(100vh - 100px);
           border-radius: 12px;
           transform: none;
-          margin-top: 0.5rem;
         }
 
         @media (max-width: 480px) {
+          bottom: 0.75rem;
           right: 0.5rem;
           left: 0.5rem;
           max-height: calc(100vh - 90px);
