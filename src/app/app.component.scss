@@ -298,30 +298,33 @@
 
         @media (max-width: 768px) {
           position: fixed;
-          top: 50%;
+          top: 80px;
           left: 50%;
           right: auto;
-          transform: translate(-50%, -50%);
+          bottom: auto;
+          transform: translateX(-50%);
           width: min(380px, calc(100vw - 2rem));
           max-width: calc(100vw - 2rem);
-          max-height: 85vh;
-          min-height: 250px;
+          max-height: calc(100vh - 100px);
+          min-height: 300px;
           border-radius: 12px;
           margin: 0;
         }
 
         @media (max-width: 640px) {
+          top: 70px;
           width: calc(100vw - 2rem);
           max-width: calc(100vw - 2rem);
-          max-height: 85vh;
-          min-height: 200px;
+          max-height: calc(100vh - 90px);
+          min-height: 250px;
         }
 
         @media (max-width: 480px) {
+          top: 60px;
           width: calc(100vw - 1.5rem);
           max-width: calc(100vw - 1.5rem);
-          max-height: 85vh;
-          min-height: 180px;
+          max-height: calc(100vh - 80px);
+          min-height: 220px;
           border-radius: 10px;
         }
 
@@ -337,13 +340,17 @@
           box-sizing: border-box;
 
           @media (max-width: 768px) {
-            padding: 1rem 1.25rem;
+            padding: 0.875rem 1.25rem;
             gap: 0.75rem;
           }
 
           @media (max-width: 640px) {
-            padding: 1rem 1rem;
-            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            gap: 0.5rem;
+          }
+
+          @media (max-width: 480px) {
+            padding: 0.625rem 0.875rem;
           }
 
           h3 {
@@ -392,13 +399,14 @@
           flex: 1 1 auto;
           overflow-y: auto;
           overflow-x: hidden;
-          padding: 0.5rem 0;
+          padding: 0;
           -webkit-overflow-scrolling: touch;
           max-width: 100%;
           width: 100%;
           min-height: 0;
           display: flex;
           flex-direction: column;
+          scroll-behavior: smooth;
 
           // Custom scrollbar styling
           &::-webkit-scrollbar {
