@@ -27,6 +27,22 @@
       }
       <a href="#" (click)="closeMobileMenu(); $event.preventDefault()" aria-label="Explore articles">Explore</a>
       <a href="#" (click)="closeMobileMenu(); $event.preventDefault()" aria-label="Learn about us">About</a>
+      @if (isAuthenticated()) {
+        <button 
+          type="button" 
+          class="mobile-logout-button" 
+          [disabled]="logoutLoading()"
+          (click)="logout(); closeMobileMenu()" 
+          aria-label="Logout">
+          @if (logoutLoading()) {
+            <span class="mobile-logout-button__loader"></span>
+            <span>Logging out...</span>
+          } @else {
+            <i class="material-symbols-rounded">logout</i>
+            <span>Logout</span>
+          }
+        </button>
+      }
     </nav>
     <div class="app-header__actions">
       @if (isAuthenticated()) {

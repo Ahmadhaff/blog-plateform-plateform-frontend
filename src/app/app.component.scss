@@ -156,6 +156,49 @@
           font-weight: 600;
         }
       }
+
+      .mobile-logout-button {
+        width: 100%;
+        padding: 1rem 0;
+        background: transparent;
+        border: none;
+        border-top: 1px solid rgba(148, 163, 184, 0.1);
+        margin-top: 1rem;
+        padding-top: 1rem;
+        color: rgba(220, 38, 38, 0.9);
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: color 0.2s ease;
+        text-align: left;
+
+        &:hover:not(:disabled) {
+          color: #fca5a5;
+        }
+
+        &:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+
+        i {
+          font-size: 1.25rem;
+        }
+
+        &__loader {
+          display: inline-block;
+          width: 14px;
+          height: 14px;
+          border: 2px solid rgba(220, 38, 38, 0.3);
+          border-top-color: rgba(220, 38, 38, 0.9);
+          border-radius: 50%;
+          animation: logoutSpin 0.8s linear infinite;
+          flex-shrink: 0;
+        }
+      }
     }
 
     a {
@@ -729,7 +772,7 @@
       }
 
       @media (max-width: 480px) {
-        display: none; // Hide logout text on very small screens, keep icon button
+        display: none; // Hide on very small screens - logout available in mobile menu
       }
 
       &:hover:not(:disabled) {

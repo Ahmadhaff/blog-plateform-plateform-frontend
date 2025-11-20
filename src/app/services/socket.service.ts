@@ -85,6 +85,10 @@ export class SocketService {
     this.isConnecting = false;
     this.listenersSetup = false;
     if (this.socket) {
+      // Emit disconnect event to backend before disconnecting
+      if (this.socket.connected) {
+        this.socket.emit('userDisconnect');
+      }
       this.socket.removeAllListeners();
       this.socket.disconnect();
       this.socket = null;
