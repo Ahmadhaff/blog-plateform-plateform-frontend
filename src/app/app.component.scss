@@ -274,12 +274,14 @@
       }
 
       .notification-dropdown {
-        position: absolute;
-        top: calc(100% + 0.75rem);
+        position: fixed;
+        top: auto;
+        bottom: auto;
         right: 0;
+        left: auto;
         width: 380px;
         max-width: calc(100vw - 1rem);
-        max-height: 70vh;
+        max-height: calc(100vh - 120px);
         background: #fff;
         border-radius: 16px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
@@ -288,15 +290,25 @@
         display: flex;
         flex-direction: column;
         animation: slideDown 0.2s ease-out;
+        margin-top: 0.75rem;
 
         @media (max-width: 640px) {
-          right: auto;
-          left: 50%;
-          transform: translateX(-50%);
-          width: calc(100vw - 1rem);
-          max-width: 380px;
-          max-height: 60vh;
+          position: fixed;
+          right: 0.5rem;
+          left: 0.5rem;
+          width: auto;
+          max-width: none;
+          max-height: calc(100vh - 100px);
           border-radius: 12px;
+          transform: none;
+          margin-top: 0.5rem;
+        }
+
+        @media (max-width: 480px) {
+          right: 0.5rem;
+          left: 0.5rem;
+          max-height: calc(100vh - 90px);
+          border-radius: 10px;
         }
 
         &__header {
@@ -354,6 +366,8 @@
           overflow-x: hidden;
           padding: 0.5rem 0;
           -webkit-overflow-scrolling: touch;
+          max-width: 100%;
+          width: 100%;
 
           @media (max-width: 640px) {
             padding: 0.25rem 0;
@@ -368,6 +382,10 @@
             transition: background 0.2s ease;
             border-bottom: 1px solid #f1f5f9;
             position: relative;
+            max-width: 100%;
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
 
             @media (max-width: 640px) {
               gap: 0.75rem;
@@ -429,6 +447,7 @@
               flex: 1;
               min-width: 0;
               overflow: hidden;
+              max-width: 100%;
 
               .notification-item__title {
                 font-size: 0.9375rem;
@@ -438,6 +457,9 @@
                 line-height: 1.4;
                 word-wrap: break-word;
                 overflow-wrap: break-word;
+                word-break: break-word;
+                max-width: 100%;
+                overflow: hidden;
 
                 @media (max-width: 640px) {
                   font-size: 0.875rem;
@@ -452,6 +474,9 @@
                 line-height: 1.4;
                 word-wrap: break-word;
                 overflow-wrap: break-word;
+                word-break: break-word;
+                max-width: 100%;
+                overflow: hidden;
 
                 @media (max-width: 640px) {
                   font-size: 0.75rem;
@@ -462,6 +487,10 @@
               .notification-item__time {
                 font-size: 0.75rem;
                 color: #94a3b8;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 100%;
 
                 @media (max-width: 640px) {
                   font-size: 0.6875rem;
