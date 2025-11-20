@@ -792,17 +792,6 @@
       justify-content: flex-end;
     }
 
-    .notification-container {
-      .notification-dropdown {
-        @media (max-width: 640px) {
-          right: auto;
-          left: 50%;
-          transform: translateX(-50%);
-          width: calc(100vw - 1rem);
-          max-width: 380px;
-        }
-      }
-    }
   }
 }
 
